@@ -1,0 +1,77 @@
+.cursorWrap {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 999999;
+}
+
+/* Outer liquid ring */
+.cursorRing {
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(190, 255, 110, 0.52);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 10px rgba(178, 245, 72, 0.14));
+  opacity: 0.92;
+  will-change: transform, border-radius, width, height;
+  pointer-events: none;
+  /* Size transitions handled by JS — ring still gets CSS transition for smooth interpolation */
+  transition:
+    width 0.55s cubic-bezier(0.19, 1, 0.22, 1),
+    height 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Click ripple — starts from cursor edge, matches cursor organic shape, spreads outward */
+.ripple {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 99999;
+  border: 2px solid rgba(178, 245, 72, 0.85);
+  /* Dynamic shape driven by JS-set CSS variables */
+  width: var(--ripple-start-size, 84px);
+  height: var(--ripple-start-size, 84px);
+  border-radius: var(--ripple-start-radius, 50%);
+  animation: rippleAnim 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes rippleAnim {
+  0% {
+    border-width: 2px;
+    border-color: rgba(178, 245, 72, 0.85);
+    box-shadow:
+      0 0 6px 2px rgba(178, 245, 72, 0.40),
+      0 0 0 0 rgba(178, 245, 72, 0.15);
+    opacity: 0.9;
+  }
+  25% {
+    border-color: rgba(178, 245, 72, 0.55);
+    box-shadow:
+      0 0 12px 5px rgba(178, 245, 72, 0.18),
+      0 0 25px 10px rgba(178, 245, 72, 0.06);
+    opacity: 0.7;
+  }
+  60% {
+    border-color: rgba(178, 245, 72, 0.20);
+    box-shadow:
+      0 0 25px 12px rgba(178, 245, 72, 0.05),
+      0 0 50px 25px rgba(178, 245, 72, 0.01);
+    opacity: 0.35;
+  }
+  100% {
+    width: calc(var(--ripple-start-size, 84px) + 220px);
+    height: calc(var(--ripple-start-size, 84px) + 220px);
+    border-width: 0.5px;
+    border-color: rgba(178, 245, 72, 0);
+    filter: blur(3px);
+    box-shadow:
+      0 0 60px 30px rgba(178, 245, 72, 0),
+      0 0 80px 40px rgba(178, 245, 72, 0);
+    opacity: 0;
+  }
+}

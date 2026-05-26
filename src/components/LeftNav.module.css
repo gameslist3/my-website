@@ -1,0 +1,347 @@
+/* ── Outer wrapper ─────────────────────────────────── */
+.leftNav {
+  position: fixed;
+  left: 20px;
+  top: 18%;
+  transform: none;
+  z-index: 30;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+  pointer-events: auto;
+}
+
+/* ── Stack ─────────────────────────────────────────── */
+.stack {
+  position: relative;
+  width: 280px;
+  height: 680px;
+  animation: stackFloat 7s ease-in-out infinite;
+  margin-left: -130px;
+}
+
+@keyframes stackFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ── Card Base ─────────────────────────────────────── */
+.card {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 36px;
+  overflow: hidden;
+  cursor: none;
+  background: linear-gradient(180deg, #191919 26.7%, #121212 83.2%);
+  border: 1px solid rgba(255, 255, 255, .04);
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, .45),
+    inset 0 1px 0 rgba(255, 255, 255, .03);
+  transition: all 1s cubic-bezier(.19, 1, .22, 1);
+}
+
+/* Card Shine */
+.card::after {
+  content: "";
+  position: absolute;
+  width: 180%;
+  height: 180%;
+  top: -140%;
+  left: -30%;
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, .08) 50%,
+    transparent 80%
+  );
+  transform: rotate(12deg);
+  transition: all 1.2s cubic-bezier(.19, 1, .22, 1);
+  pointer-events: none;
+}
+
+.card:hover::after {
+  top: -10%;
+}
+
+/* ── Default Card Positions ── */
+.card1 {
+  top: 120px;
+  left: 60px;
+  transform: rotate(-8deg) scale(.9);
+  z-index: 1;
+}
+
+.card2 {
+  top: 210px;
+  left: 72px;
+  transform: rotate(0deg) scale(.9);
+  z-index: 3;
+}
+
+.card3 {
+  top: 300px;
+  left: 60px;
+  transform: rotate(8deg) scale(.9);
+  z-index: 2;
+}
+
+/* ── Stack Hover Expand ── */
+.stack:hover .card1 {
+  top: 20px;
+  left: 30px;
+  transform: rotate(-18deg) scale(0.95);
+}
+
+.stack:hover .card2 {
+  top: 210px;
+  left: 72px;
+  transform: rotate(0deg) scale(0.95);
+}
+
+.stack:hover .card3 {
+  top: 400px;
+  left: 30px;
+  transform: rotate(18deg) scale(0.95);
+}
+
+/* ── Hover Activation Styles ── */
+.card:hover {
+  background: linear-gradient(180deg, #D2FF8C 0%, #B2F548 48.08%, #688F2A 100%);
+  box-shadow:
+    0 70px 160px rgba(178, 245, 72, .22),
+    0 30px 80px rgba(0, 0, 0, .45);
+}
+
+.card1:hover {
+  transform: rotate(-18deg) scale(0.98) translateY(-10px) !important;
+}
+
+.card2:hover {
+  transform: rotate(0deg) scale(0.98) translateY(-10px) !important;
+}
+
+.card3:hover {
+  transform: rotate(18deg) scale(0.98) translateY(-10px) !important;
+}
+
+/* ── Card Inner Content ── */
+.content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+.icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.icon path {
+  fill: #4E4E4E;
+  transition: fill .6s ease;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4E4E4E;
+  font-family: 'Space Mono', monospace;
+  transition: color .6s ease;
+}
+
+.card:hover .title {
+  color: #111;
+}
+
+.card:hover .icon path {
+  fill: #111;
+}
+
+/* ── Social Card ── */
+.socialCard {
+  position: relative;
+  padding: 24px;
+  user-select: none;
+  overflow: hidden;
+}
+
+.socialCard::before {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(210, 255, 140, .18),
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(.5);
+  opacity: 0;
+  transition: all .4s ease;
+  pointer-events: none;
+}
+
+.socialGrid {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+.socialItem {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .025);
+  border: 1px solid rgba(255, 255, 255, .03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: 'Space Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4E4E4E;
+  letter-spacing: -0.03em;
+  transition: all .45s cubic-bezier(.19, 1, .22, 1);
+}
+
+.option {
+  position: absolute;
+  transition: all .45s cubic-bezier(.19, 1, .22, 1);
+}
+
+.optionA { top: 12px; left: 12px; }
+.optionB { top: 12px; right: 12px; }
+.optionC { bottom: 12px; left: 12px; }
+.optionD { bottom: 12px; right: 12px; }
+
+/* Drag Hold State */
+.socialCard.holding {
+  width: 280px;
+  height: 280px;
+  border-radius: 46px;
+  z-index: 50;
+  transform: rotate(18deg) scale(1.02) translateY(-30px) !important;
+}
+
+.socialCard.holding::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.socialCard.holding .optionA { top: 24px; left: 24px; }
+.socialCard.holding .optionB { top: 24px; right: 24px; }
+.socialCard.holding .optionC { bottom: 24px; left: 24px; }
+.socialCard.holding .optionD { bottom: 24px; right: 24px; }
+
+.option.active .socialItem {
+  background: linear-gradient(180deg, #D2FF8C 0%, #B2F548 48.08%, #688F2A 100%);
+  color: #111;
+  transform: scale(1.14);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 24px 60px rgba(178, 245, 72, .28);
+}
+
+.socialCard:hover .socialItem {
+  color: #111;
+}
+
+/* ── Section Progress ── */
+.progressTrack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  padding-left: 16px;
+  margin-left: 50px;
+}
+
+.progressLine {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 30px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent
+  );
+}
+
+.sectionItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: none;
+  color: #666;
+  transition: color 0.25s ease;
+  z-index: 1;
+}
+
+.sectionItem:hover {
+  color: #fff;
+}
+
+.sectionActive {
+  color: #B2F548;
+}
+
+.numBadge {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0a0a0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inconsolata', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sectionActive .numBadge {
+  border-color: #B2F548;
+  box-shadow: 0 0 12px rgba(178, 245, 72, 0.25);
+  color: #B2F548;
+}
+
+.sectionItem:hover .numBadge {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sectionLabel {
+  font-family: 'Inconsolata', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #B2F548;
+}

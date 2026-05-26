@@ -1,0 +1,94 @@
+.bottomArea {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 3.5vh;
+  pointer-events: none;
+}
+
+/* Giant atmospheric "Designer" text behind the nav */
+.typographyContainer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  pointer-events: none;
+  z-index: 0;
+  line-height: 1;
+}
+
+.hugeText {
+  font-family: 'Bagel Fat One', cursive;
+  font-size: clamp(80px, 18vw, 240px);
+  font-weight: 400;
+  background: linear-gradient(180deg, #191919 26.7%, #0D0D0D 83.2%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  white-space: nowrap;
+  user-select: none;
+  transform: translateX(-50%);
+  display: block;
+  /* text-shadow:
+    0 0 80px rgba(178, 245, 72, 0.06),
+    0 0 160px rgba(178, 245, 72, 0.03); */
+}
+
+/* Bottom nav row */
+.bottomNav {
+  display: flex;
+  gap: clamp(24px, 5vw, 64px);
+  z-index: 10;
+  pointer-events: auto;
+  padding-bottom: 2px;
+}
+
+.navItem {
+  font-family: 'Inconsolata', monospace;
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: color 0.3s ease, transform 0.3s ease;
+  position: relative;
+}
+
+.navItem::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background: #B2F548;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(178, 245, 72, 0.6);
+}
+
+.navItem:hover {
+  color: #fff;
+  transform: translateY(-4px);
+}
+
+.navItem:hover::after {
+  width: 100%;
+}
+
+.navItem.navActive {
+  color: #B2F548 !important;
+  text-shadow: 0 0 10px rgba(178, 245, 72, 0.4);
+}
+
+.navItem.navActive::after {
+  width: 100% !important;
+}

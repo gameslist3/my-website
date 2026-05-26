@@ -1,0 +1,102 @@
+.rightIdentity {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100%;
+  text-align: right;
+  max-width: 280px;
+}
+
+.aboutText {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 13px;
+  line-height: 1.75;
+  font-family: 'Inconsolata', monospace;
+  font-weight: 400;
+  text-align: right;
+  letter-spacing: 0.03em;
+}
+
+.line {
+  white-space: pre-wrap;
+  display: block;
+}
+
+.signatureContainer {
+  margin-top: 32px;
+  width: 200px;
+  opacity: 0.75;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  cursor: none;
+  align-self: flex-end;
+}
+
+.signatureContainer:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 12px rgba(178, 245, 72, 0.4));
+}
+
+.projectsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.projectItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 16px;
+  cursor: none;
+  transition: border-color 0.4s ease;
+}
+
+.projectItem:hover {
+  border-color: rgba(178, 245, 72, 0.3);
+}
+
+.projHeader {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-family: 'Inconsolata', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #B2F548;
+  margin-bottom: 8px;
+}
+
+.projNum {
+  font-weight: 700;
+}
+
+.projYear {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.projTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.projectItem:hover .projTitle {
+  color: #fff;
+}
+
+.projRole {
+  font-family: 'Inconsolata', monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+
