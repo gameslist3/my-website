@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './LeftNav.module.css';
 
@@ -10,164 +10,256 @@ interface LeftNavProps {
 }
 
 const sections = ['Overview', 'Work', 'Experience', 'Profiles', 'Contact'];
+const ease: [number, number, number, number] = [0.19, 1, 0.22, 1];
 
 export default function LeftNav({ activeSection, setActiveSection }: LeftNavProps) {
+  const [stackHovered, setStackHovered] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [holding, setHolding] = useState(false);
   const [activeOption, setActiveOption] = useState<string | null>(null);
-  const [animationKey, setAnimationKey] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [card1Closing, setCard1Closing] = useState(false);
+  const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
+  const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Trigger animation on window resize (debounced 150ms)
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setAnimationKey((prev) => prev + 1);
-      }, 150);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  const isFirstMount = useRef(true);
-
-  // Trigger animation when activeSection changes (scroll-based screen change)
-  useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
-    setAnimationKey((prev) => prev + 1);
-  }, [activeSection]);
-
+  const card1Ref = useRef<HTMLDivElement>(null);
   const optionARef = useRef<HTMLDivElement>(null);
   const optionBRef = useRef<HTMLDivElement>(null);
-  const optionCRRef = useRef<HTMLDivElement>(null);
+  const optionCRef = useRef<HTMLDivElement>(null);
   const optionDRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
+  // ── Focus search input after modal opens ──
   useEffect(() => {
-    const handleMouseUp = () => {
-      setHolding(false);
-      setActiveOption(null);
+    if (searchOpen && inputRef.current) {
+      const t = setTimeout(() => inputRef.current?.focus(), 750);
+      return () => clearTimeout(t);
+    }
+  }, [searchOpen]);
+
+  // ── ESC to close search ──
+  useEffect(() => {
+    if (!searchOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSearchOpen(false);
     };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [searchOpen]);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!holding) return;
-
-      const checkInside = (ref: React.RefObject<HTMLDivElement | null>) => {
+  // ── Social card hold interaction ──
+  useEffect(() => {
+    if (!holding) return;
+    const handleUp = () => { setHolding(false); setActiveOption(null); };
+    const handleMove = (e: MouseEvent) => {
+      const inside = (ref: React.RefObject<HTMLDivElement | null>) => {
         if (!ref.current) return false;
-        const rect = ref.current.getBoundingClientRect();
-        return (
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom
-        );
+        const r = ref.current.getBoundingClientRect();
+        return e.clientX >= r.left && e.clientX <= r.right &&
+               e.clientY >= r.top && e.clientY <= r.bottom;
       };
-
-      if (checkInside(optionARef)) {
-        setActiveOption('a');
-      } else if (checkInside(optionBRef)) {
-        setActiveOption('b');
-      } else if (checkInside(optionCRRef)) {
-        setActiveOption('c');
-      } else if (checkInside(optionDRef)) {
-        setActiveOption('d');
-      } else {
-        setActiveOption(null);
-      }
+      if (inside(optionARef)) setActiveOption('a');
+      else if (inside(optionBRef)) setActiveOption('b');
+      else if (inside(optionCRef)) setActiveOption('c');
+      else if (inside(optionDRef)) setActiveOption('d');
+      else setActiveOption(null);
     };
-
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('mousemove', handleMove);
+    return () => { window.removeEventListener('mouseup', handleUp); window.removeEventListener('mousemove', handleMove); };
   }, [holding]);
 
+  // ── Handle Ask card click → morph to search bar ──
+  const handleAskClick = useCallback(() => {
+    if (card1Ref.current) {
+      const rect = card1Ref.current.getBoundingClientRect();
+      setSearchOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+      setSearchTarget({ left: window.innerWidth / 2 - 440, top: window.innerHeight / 2 - 60 });
+    }
+    setSearchOpen(true);
+  }, []);
+
+  const handleCloseSearch = useCallback(() => {
+    setSearchOpen(false);
+    setCard1Closing(true);
+  }, []);
+
+  // ── Card fan-out transforms ──
+  const getCardAnimate = (cardNum: number) => {
+    // Card 1 stays hidden during search AND during the exit animation
+    if (cardNum === 1 && (searchOpen || card1Closing)) {
+      return { opacity: 0, rotate: -8, y: 0, x: 60, scale: 0.9 };
+    }
+    if (!stackHovered) {
+      switch (cardNum) {
+        case 1: return { opacity: 1, rotate: -8, y: 0, x: 60, scale: 0.9 };
+        case 2: return { opacity: 1, rotate: 0, y: 0, x: 72, scale: 0.9 };
+        case 3: return { opacity: 1, rotate: 8, y: 0, x: 56, scale: 0.9 };
+        default: return { opacity: 1 };
+      }
+    }
+    switch (cardNum) {
+      case 1: return { opacity: 1, rotate: -18, y: -90, x: 30, scale: 0.95 };
+      case 2: return { opacity: 1, rotate: 0, y: 0, x: 72, scale: 0.95 };
+      case 3: return { opacity: 1, rotate: 18, y: 90, x: 30, scale: 0.95 };
+      default: return { opacity: 1 };
+    }
+  };
+
   return (
-    <motion.div
-      className={`${styles.leftNav} interactive-nav`}
-      initial={{ opacity: 0, scale: 0.85, x: -60, filter: 'blur(12px)' }}
-      animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 2.0, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div className={styles.leftNav}>
+      {/* Ambient neon-green glow in corners */}
+      <div className={styles.ambientGlow} />
+
       {/* ── Stacked Cards ── */}
-      <AnimatePresence mode="wait">
+      <div
+        className={styles.stack}
+        onMouseEnter={() => setStackHovered(true)}
+        onMouseLeave={() => { setStackHovered(false); setHoveredCard(null); }}
+      >
         <motion.div
-          className={styles.stack}
-          key={`stack-${animationKey}`}
-          initial={{ opacity: 0, scale: 0.6, x: -200, filter: 'blur(15px) brightness(2)' }}
-          animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px) brightness(1)' }}
-          exit={{ opacity: 0, scale: 0.3, x: 280, filter: 'blur(24px) brightness(2.5)', transition: { duration: 0.5 } }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className={styles.floatWrapper}
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         >
-        {/* CARD 1 — Ask */}
-        <div className={`${styles.card} ${styles.card1} interactive`}>
-          <div className={styles.content}>
-            <div className={styles.icon}>
-              <svg viewBox="0 0 24 24" width="100%" height="100%">
-                <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8c1.85 0 3.55-.63 4.9-1.69l4.39 4.39 1.41-1.41-4.39-4.39A7.93 7.93 0 0 0 18 10c0-4.42-3.58-8-8-8Z" />
-              </svg>
+          {/* ── CARD 1 — Ask ── */}
+          <motion.div
+            ref={card1Ref}
+            className={`${styles.card} ${styles.card1} ${hoveredCard === 1 ? styles.cardGreen : ''} interactive`}
+            animate={getCardAnimate(1)}
+            transition={{ duration: 0.8, ease }}
+            onMouseEnter={() => setHoveredCard(1)}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={handleAskClick}
+          >
+            <div className={styles.shine} />
+            <div className={styles.content}>
+              <div className={styles.icon}>
+                <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none">
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                  <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div className={styles.title}>Ask</div>
             </div>
-            <div className={styles.title}>Ask</div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* CARD 2 — Resume */}
-        <div className={`${styles.card} ${styles.card2} interactive`}>
-          <div className={styles.content}>
-            <div className={styles.icon}>
-              <svg viewBox="0 0 24 24" width="100%" height="100%">
-                <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
-              </svg>
+          {/* ── CARD 2 — Resume ── */}
+          <motion.div
+            className={`${styles.card} ${styles.card2} ${hoveredCard === 2 ? styles.cardGreen : ''} interactive`}
+            animate={getCardAnimate(2)}
+            transition={{ duration: 0.8, ease }}
+            onMouseEnter={() => setHoveredCard(2)}
+            onMouseLeave={() => setHoveredCard(null)}
+          >
+            <div className={styles.shine} />
+            <div className={styles.content}>
+              <div className={styles.icon}>
+                <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none">
+                  <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" />
+                  <path d="M9 13h6M9 17h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div className={styles.title}>Resume</div>
             </div>
-            <div className={styles.title}>Resume</div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* CARD 3 — Social Card with drag-hold options */}
-        <div
-          className={`${styles.card} ${styles.card3} ${styles.socialCard} ${holding ? styles.holding : ''} interactive`}
-          onMouseDown={(e) => {
-            if (e.button === 0) { // Left click
-              setHolding(true);
-            }
-          }}
-        >
-          <div className={styles.socialGrid}>
-            <div
-              ref={optionARef}
-              className={`${styles.option} ${styles.optionA} ${activeOption === 'a' ? styles.active : ''}`}
-            >
-              <div className={styles.socialItem}>IN</div>
+          {/* ── CARD 3 — Social ── */}
+          <motion.div
+            className={`${styles.card} ${styles.card3} ${styles.socialCard} ${hoveredCard === 3 ? styles.cardGreen : ''} ${holding ? styles.holding : ''} interactive`}
+            animate={getCardAnimate(3)}
+            transition={{ duration: 0.8, ease }}
+            onMouseEnter={() => setHoveredCard(3)}
+            onMouseLeave={() => setHoveredCard(null)}
+            onMouseDown={(e) => { if (e.button === 0) setHolding(true); }}
+          >
+            <div className={styles.shine} />
+            <div className={styles.socialGrid}>
+              <div ref={optionARef} className={`${styles.option} ${styles.optionA} ${activeOption === 'a' ? styles.active : ''}`}>
+                <div className={styles.socialItem}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </div>
+              </div>
+              <div ref={optionBRef} className={`${styles.option} ${styles.optionB} ${activeOption === 'b' ? styles.active : ''}`}>
+                <div className={styles.socialItem}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.722-.902 1.143-1.642.982-.721-.16-1.142-.902-.981-1.643.18-.722.902-1.143 1.642-.981.74.16 1.142.902.981 1.643zm-1.383 5.673c-1.242 1.322-3.156 1.984-5.51 1.984-1.463 0-2.484-.28-3.807-.882l-2.103.722.722-1.964c-1.102-.882-1.723-2.123-1.723-3.566 0-2.203 1.242-5.55 6.91-5.55 2.445 0 4.288.641 5.35 1.442l1.923-.56-.64 1.984c.561.882.882 2.042.882 3.526 0 1.601-.52 2.903-2.004 3.908zm-4.849-2.884c0 .56-.24 1.082-.641 1.442-.48.4-1.082.56-1.764.56-1.042 0-1.643-.48-1.643-1.562 0-1.082.64-2.324 1.603-2.324.48 0 .961.16 1.322.48.4.321.64.802.64 1.322.16.08.483.08.483.08zm3.446 0c0-.56-.24-1.082-.64-1.442-.481-.4-1.082-.56-1.764-.56-1.042 0-1.643.48-1.643 1.562 0 1.082.64 2.324 1.603 2.324.481 0 .961-.16 1.322-.48.4-.321.64-.802.64-1.322.16-.08.482-.08.482-.08z"/></svg>
+                </div>
+              </div>
+              <div ref={optionCRef} className={`${styles.option} ${styles.optionC} ${activeOption === 'c' ? styles.active : ''}`}>
+                <div className={styles.socialItem}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                </div>
+              </div>
+              <div ref={optionDRef} className={`${styles.option} ${styles.optionD} ${activeOption === 'd' ? styles.active : ''}`}>
+                <div className={styles.socialItem}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.691 2.28 24 3.434 24 5.457z"/></svg>
+                </div>
+              </div>
             </div>
-            <div
-              ref={optionBRef}
-              className={`${styles.option} ${styles.optionB} ${activeOption === 'b' ? styles.active : ''}`}
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* ── Search Modal (morph overlay) ── */}
+      <AnimatePresence onExitComplete={() => setCard1Closing(false)}>
+        {searchOpen && (
+          <motion.div
+            key="search-group"
+            className={styles.searchGroup}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease }}
+          >
+            {/* Overlay backdrop */}
+            <div className={styles.overlay} onClick={handleCloseSearch} />
+            {/* Morphing search bar */}
+            <motion.div
+              className={styles.searchModal}
+              initial={{
+                left: searchOrigin.left,
+                top: searchOrigin.top,
+                width: searchOrigin.width,
+                height: searchOrigin.height,
+                borderRadius: '36px',
+              }}
+              animate={{
+                left: searchTarget.left,
+                top: searchTarget.top,
+                width: 880,
+                height: 120,
+                borderRadius: '30px',
+              }}
+              exit={{
+                left: searchOrigin.left,
+                top: searchOrigin.top,
+                width: searchOrigin.width,
+                height: searchOrigin.height,
+                borderRadius: '36px',
+              }}
+              transition={{ duration: 0.7, ease }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles.socialItem}>BE</div>
-            </div>
-            <div
-              ref={optionCRRef}
-              className={`${styles.option} ${styles.optionC} ${activeOption === 'c' ? styles.active : ''}`}
-            >
-              <div className={styles.socialItem}>GH</div>
-            </div>
-            <div
-              ref={optionDRef}
-              className={`${styles.option} ${styles.optionD} ${activeOption === 'd' ? styles.active : ''}`}
-            >
-              <div className={styles.socialItem}>MD</div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+              <div className={styles.searchContent}>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className={styles.searchInput}
+                  placeholder="Ask about me.."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button className={styles.searchButton}>
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                    <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* ── Section Progress ── */}
@@ -188,7 +280,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
                   className={styles.sectionLabel}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, ease }}
                 >
                   {title}
                 </motion.span>
@@ -197,6 +289,6 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }

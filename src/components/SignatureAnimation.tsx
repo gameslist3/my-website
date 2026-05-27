@@ -7,13 +7,36 @@ export default function SignatureAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (svgRef.current) {
-      const path = svgRef.current.querySelector('path');
-      if (path) {
-        const length = path.getTotalLength();
-        svgRef.current.style.setProperty('--svg-length', String(length));
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const path = svg.querySelector('path');
+    if (!path) return;
+
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = String(length);
+    path.style.strokeDashoffset = String(length);
+
+    const animation = path.animate(
+      [
+        { strokeDashoffset: length },
+        { strokeDashoffset: 0 },
+        { strokeDashoffset: length },
+        { strokeDashoffset: length },
+      ],
+      {
+        duration: 12000,
+        easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+        delay: 1000,
+        iterations: Infinity,
       }
-    }
+    );
+
+    return () => {
+      animation.cancel();
+      path.style.strokeDasharray = '';
+      path.style.strokeDashoffset = '';
+    };
   }, []);
 
   return (

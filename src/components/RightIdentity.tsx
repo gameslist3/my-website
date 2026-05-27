@@ -7,12 +7,6 @@ interface RightIdentityProps {
   activeSection: number;
 }
 
-const projects = [
-  { num: '01', name: 'Aether AI Dashboard', role: 'Lead SaaS Design', year: '2025' },
-  { num: '02', name: 'Kinetic System', role: 'Design Tokens & Architecture', year: '2024' },
-  { num: '03', name: 'Lumina Mobile', role: 'Interaction & iOS Design', year: '2024' }
-];
-
 const experiences = [
   { num: '01', name: 'Google', role: 'Senior Product Designer', year: '2023 - Pres' },
   { num: '02', name: 'Meta', role: 'Interaction Designer', year: '2021 - 2023' },
@@ -91,34 +85,6 @@ export default function RightIdentity({ activeSection }: RightIdentityProps) {
                 className={styles.signatureImg}
               />
             </motion.div>
-          </motion.div>
-        )}
-
-        {activeSection === 2 && (
-          <motion.div
-            key="work"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className={styles.projectsContainer}
-          >
-            {projects.map((project, i) => (
-              <motion.div
-                key={project.num}
-                variants={itemVariants(i)}
-                initial="hidden"
-                animate="visible"
-                className={styles.projectItem}
-              >
-                <div className={styles.projHeader}>
-                  <span className={styles.projNum}>{project.num}</span>
-                  <span className={styles.projYear}>{project.year}</span>
-                </div>
-                <div className={styles.projTitle}>{project.name}</div>
-                <div className={styles.projRole}>{project.role}</div>
-              </motion.div>
-            ))}
           </motion.div>
         )}
 

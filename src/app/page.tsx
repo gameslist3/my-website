@@ -8,6 +8,7 @@ import LeftNav from '@/components/LeftNav';
 import RightIdentity from '@/components/RightIdentity';
 import BottomArea from '@/components/BottomArea';
 import SoundManager from '@/components/SoundManager';
+import WorkShowcase from '@/components/WorkShowcase';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -119,8 +120,15 @@ export default function Home() {
             {/* Right + Bottom UI layer */}
             <div className={styles.uiLayer}>
               <div className={styles.spacer} />
-              <RightIdentity activeSection={activeSection} />
+              {activeSection !== 2 && <RightIdentity activeSection={activeSection} />}
             </div>
+
+            {/* Work Showcase — full width overlay for section 2 */}
+            {activeSection === 2 && (
+              <div className={styles.workSection}>
+                <WorkShowcase />
+              </div>
+            )}
 
             <BottomArea activeSection={activeSection} setActiveSection={setActiveSection} />
           </>

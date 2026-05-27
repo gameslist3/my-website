@@ -9,22 +9,4 @@
 .svg {
   width: 100%;
   height: auto;
-  stroke-dasharray: var(--svg-length, 1000);
-  stroke-dashoffset: var(--svg-length, 1000);
-  animation: signature 12s cubic-bezier(0.65, 0, 0.35, 1) 1s infinite;
-}
-
-@keyframes signature {
-  0% {
-    stroke-dashoffset: var(--svg-length, 1000);
-  }
-  25% {
-    stroke-dashoffset: 0;
-  }
-  55% {
-    stroke-dashoffset: var(--svg-length, 1000);
-  }
-  100% {
-    stroke-dashoffset: var(--svg-length, 1000);
-  }
 }
