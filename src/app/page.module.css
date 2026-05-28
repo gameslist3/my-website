@@ -40,3 +40,12 @@
   justify-content: center;
   pointer-events: none;
 }
+
+/* ── Mobile Responsiveness ─────────────────────────── */
+@media (max-width: 768px) {
+  .uiLayer {
+    padding: 24px;
+    padding-bottom: 40px;
+    align-items: flex-end;
+  }
+}

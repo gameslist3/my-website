@@ -75,3 +75,11 @@
     opacity: 0;
   }
 }
+
+/* ── Mobile Responsiveness ─────────────────────────── */
+@media (max-width: 768px) {
+  /* Hide the continuous trailing ring, but keep it in DOM so ripple can read its size/shape */
+  .cursorRing {
+    opacity: 0 !important;
+  }
+}

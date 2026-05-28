@@ -487,3 +487,37 @@
   text-transform: uppercase;
   color: #B2F548;
 }
+
+/* ── Mobile Responsiveness ─────────────────────────── */
+@media (max-width: 768px) {
+  .progressTrack {
+    display: none;
+  }
+  
+  .leftNav {
+    /* Base mobile state: partially hidden off left edge */
+    left: 0;
+    transform: translateX(-160px);
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .leftNav.expanded {
+    /* Centered state */
+    transform: translateX(calc(50vw - 110px));
+  }
+  
+  /* Make the search modal fit mobile screens */
+  .searchModal {
+    width: 90vw !important;
+    left: 5vw !important;
+  }
+  
+  .searchContent {
+    padding: 0 16px;
+  }
+  
+  .searchInput {
+    font-size: 18px;
+  }
+}
+

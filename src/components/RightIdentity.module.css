@@ -119,4 +119,27 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Mobile Responsiveness ─────────────────────────── */
+@media (max-width: 768px) {
+  .rightIdentity {
+    max-width: 100%;
+    align-items: flex-end;
+  }
+
+  .aboutText {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .projectsContainer {
+    max-width: 100%;
+    gap: 24px;
+  }
+  
+  .signatureContainer {
+    width: 160px;
+    margin-top: 24px;
+  }
+}
+
 

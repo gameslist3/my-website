@@ -19,6 +19,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [activeOption, setActiveOption] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [card1Closing, setCard1Closing] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -236,13 +237,14 @@ ${profileData.longTermGoals}
   };
 
   return (
-    <div className={styles.leftNav}>
+    <div className={`${styles.leftNav} ${mobileExpanded ? styles.expanded : ''}`}>
       {/* Ambient neon-green glow in corners */}
       <div className={styles.ambientGlow} />
 
       {/* ── Stacked Cards ── */}
       <div
         className={styles.stack}
+        onClick={() => setMobileExpanded(!mobileExpanded)}
         onMouseEnter={() => setStackHovered(true)}
         onMouseLeave={() => { setStackHovered(false); setHoveredCard(null); }}
       >
