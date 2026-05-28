@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './LeftNav.module.css';
-import { askAgent } from '@/lib/agentLogic';
 
 interface LeftNavProps {
   activeSection: number;
@@ -78,7 +77,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     if (card1Ref.current) {
       const rect = card1Ref.current.getBoundingClientRect();
       setSearchOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
-      setSearchTarget({ left: window.innerWidth / 2 - 440, top: window.innerHeight / 2 - 60 });
+      setSearchTarget({ left: window.innerWidth / 2 - 440, top: window.innerHeight / 2 - 200 });
     }
     setSearchOpen(true);
   }, []);
@@ -91,15 +90,37 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     setIsSearching(false);
   }, []);
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     setAnswer(null);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch('/api/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+      
+      if (response.ok) {
+        const res = await response.json();
+        setAnswer({ text: res.answer, generic: res.generic });
+      } else {
+        // Fallback to local rule if server returns an error
+        const { askAgent } = await import('@/lib/agentLogic');
+        const res = askAgent(searchQuery);
+        setAnswer({ text: res.answer, generic: res.generic });
+      }
+    } catch (error) {
+      console.error("API error, falling back to local search:", error);
+      const { askAgent } = await import('@/lib/agentLogic');
       const res = askAgent(searchQuery);
       setAnswer({ text: res.answer, generic: res.generic });
+    } finally {
       setIsSearching(false);
-    }, 600);
+    }
   }, [searchQuery]);
 
   // ── Card fan-out transforms ──

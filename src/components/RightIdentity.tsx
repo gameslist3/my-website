@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import styles from './RightIdentity.module.css';
 import SignatureAnimation from './SignatureAnimation';
 
+import { profileData } from '@/lib/profileData';
+import { getExperienceDuration, formatExperience } from '@/lib/dateUtils';
+
 interface RightIdentityProps {
   activeSection: number;
 }
@@ -27,7 +30,28 @@ const contacts = [
 ];
 
 export default function RightIdentity({ activeSection }: RightIdentityProps) {
-  const text = "UI UX and Product Designer\nwith over 6+ Years of\nexperience designing\nscalable digital products\nfor SaaS, AI platforms,\ndashboards, and modern web\nor mobile applications.\nSkilled at turning complex\nworkflows into clean, user\nfriendly experiences through\nstrong product thinking,\ninteraction design, and\nscalable design systems.\nExperienced in working with\ncross functional teams to\ndeliver high quality\ninterfaces that improve\nusability and business\nimpact.";
+  const experienceDuration = getExperienceDuration(profileData.experienceStart);
+  const expString = formatExperience(experienceDuration);
+
+  const text = `UI UX and Product Designer
+with over ${expString} of
+experience designing
+scalable digital products
+for SaaS, AI platforms,
+dashboards, and modern web
+or mobile applications.
+Skilled at turning complex
+workflows into clean, user
+friendly experiences through
+strong product thinking,
+interaction design, and
+scalable design systems.
+Experienced in working with
+cross functional teams to
+deliver high quality
+interfaces that improve
+usability and business
+impact.`;
   const lines = text.split('\n');
 
   const containerVariants = {
@@ -61,11 +85,11 @@ export default function RightIdentity({ activeSection }: RightIdentityProps) {
                   transition={{ duration: 0.8, delay: 0.3 + i * 0.04 }}
                   className={styles.line}
                 >
-                  {line.includes('6+ Years') ? (
+                  {line.includes(expString) ? (
                     <>
-                      {line.split('6+ Years')[0]}
-                      <span className="text-neon">6+ Years</span>
-                      {line.split('6+ Years')[1]}
+                      {line.split(expString)[0]}
+                      <span className="text-neon">{expString}</span>
+                      {line.split(expString)[1]}
                     </>
                   ) : (
                     line

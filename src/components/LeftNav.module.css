@@ -1,4 +1,3 @@
-/* ── Outer Wrapper ─────────────────────────────────── */
 .leftNav {
   position: fixed;
   left: 20px;
@@ -9,7 +8,6 @@
   align-items: flex-start;
   gap: 0;
   pointer-events: auto;
-  transform: translateZ(100px); /* Push forward in 3D space just in case */
 }
 
 /* ── Ambient Neon-Green Glow ───────────────────────── */
