@@ -1,283 +1,208 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, MouseEvent } from 'react';
+import { motion, PanInfo } from 'framer-motion';
 import styles from './WorkShowcase.module.css';
-import { behanceProjects } from '@/lib/behanceProjects';
+import { behanceProjects, BehanceProject } from '@/lib/behanceProjects';
 
-const springSmooth = {
-  type: 'spring' as const,
-  stiffness: 200,
-  damping: 28,
-  mass: 0.8,
-};
+function TiltCard({ 
+  project, 
+  isActive, 
+  relativeIndex, 
+  onClick 
+}: { 
+  project: BehanceProject, 
+  isActive: boolean, 
+  relativeIndex: number, 
+  onClick: () => void 
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Tilt mechanics
+  const MAX_TILT = 18;
+  const [tiltStyle, setTiltStyle] = useState({
+    rotateX: 0,
+    rotateY: 0,
+    shineOpacity: 0,
+    shineX: 50,
+    shineY: 50
+  });
 
-/* ── Color palettes per project ──────────────────── */
-const projectPalettes = [
-  { bg: ['#0f0f1a', '#1a1a2e'], accent: '#B2F548', glow: 'rgba(178, 245, 72, 0.12)' },
-  { bg: ['#1a0f1a', '#2d1b2e'], accent: '#FF6B6B', glow: 'rgba(255, 107, 107, 0.12)' },
-  { bg: ['#0f1a0f', '#1b2d1a'], accent: '#64FFDA', glow: 'rgba(100, 255, 218, 0.12)' },
-  { bg: ['#1a0f0f', '#2e1b1b'], accent: '#FFD93D', glow: 'rgba(255, 217, 61, 0.12)' },
-];
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isActive) return;
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    
+    const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
+    const cx = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+    const cy = clamp((e.clientY - rect.top) / rect.height, 0, 1);
 
-/* ── Cover image component ──────────────────────── */
-function CoverImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+    setTiltStyle({
+      rotateX: -(cy - 0.5) * MAX_TILT * 2,
+      rotateY: (cx - 0.5) * MAX_TILT * 2,
+      shineOpacity: 1,
+      shineX: Math.round(cx * 100),
+      shineY: Math.round(cy * 100)
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({ rotateX: 0, rotateY: 0, shineOpacity: 0, shineX: 50, shineY: 50 });
+  };
+
+  // Base transforms depending on position
+  let x = 0;
+  let rY = 0;
+  let scale = 1;
+  let opacity = 1;
+  let zIndex = 10;
+  let filter = 'blur(0px)';
+
+  if (relativeIndex < 0) {
+    x = -260;
+    rY = 20;
+    scale = 0.8;
+    opacity = 0.4;
+    zIndex = 5;
+    filter = 'blur(6px)';
+  } else if (relativeIndex > 0) {
+    x = 260;
+    rY = -20;
+    scale = 0.8;
+    opacity = 0.4;
+    zIndex = 5;
+    filter = 'blur(6px)';
+  }
+
+  // Hide if too far
+  if (Math.abs(relativeIndex) > 1) {
+    opacity = 0;
+    scale = 0.6;
+    zIndex = 0;
+  }
+
   return (
-    <div className={`${styles.coverWrap} ${className || ''}`}>
-      <img
-        src={src}
-        alt={alt}
-        className={styles.coverImg}
-        loading="lazy"
-        onError={(e) => {
-          // If image fails to load, show a gradient fallback
-          const target = e.currentTarget;
-          target.style.display = 'none';
+    <motion.div
+      className={`${styles.cardWrap} ${isActive ? 'interactive' : ''}`}
+      onClick={!isActive ? onClick : undefined}
+      initial={false}
+      animate={{
+        x,
+        rotateY: rY,
+        scale,
+        opacity,
+        zIndex,
+        filter
+      }}
+      transition={{ type: 'spring', stiffness: 260, damping: 25 }}
+      style={{
+        pointerEvents: Math.abs(relativeIndex) > 1 ? 'none' : 'auto',
+        cursor: isActive ? 'auto' : 'pointer'
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <motion.div 
+        ref={cardRef}
+        className={styles.card}
+        animate={{
+          rotateX: isActive ? tiltStyle.rotateX : 0,
+          rotateY: isActive ? tiltStyle.rotateY : 0,
+          scale: isActive && tiltStyle.shineOpacity > 0 ? 1.03 : 1
         }}
-      />
-      {/* Fallback gradient shown while image loads or on error */}
-      <div className={styles.coverFallback} />
-    </div>
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        <div 
+          className={styles.cardShine} 
+          style={{ 
+            opacity: tiltStyle.shineOpacity, 
+            background: `radial-gradient(circle at ${tiltStyle.shineX}% ${tiltStyle.shineY}%, rgba(178,245,72,0.18) 0%, transparent 65%)` 
+          }} 
+        />
+        
+        <div className={styles.cardImg}>
+          <div className={styles.cardGrid} />
+          <motion.img 
+            src={project.coverUrl}
+            alt={project.title}
+            className={styles.cardImgInner}
+            animate={{
+               x: isActive ? tiltStyle.rotateY * 0.6 : 0,
+               y: isActive ? tiltStyle.rotateX * -0.6 : 0
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            draggable={false}
+          />
+        </div>
+        
+        <motion.div 
+          className={styles.cardBody}
+          animate={{
+             x: isActive ? tiltStyle.rotateY * 0.3 : 0,
+             y: isActive ? tiltStyle.rotateX * -0.3 : 0
+          }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+          <span className={styles.cardTag}>{project.type}</span>
+          <h3 className={styles.cardTitle}>{project.title}</h3>
+          <p className={styles.cardDesc}>
+            {project.description.length > 80 ? project.description.slice(0, 80) + '...' : project.description}
+          </p>
+          
+          <div className={styles.cardFooter}>
+            <div className={styles.cardMeta}>{project.year}</div>
+            <a 
+              href={project.behanceUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={`${styles.behanceBtn} interactive`}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              View Project
+            </a>
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 export default function WorkShowcase() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const constraintsRef = useRef<HTMLDivElement>(null);
-  const total = behanceProjects.length;
 
-  /* ── 3 visible slots ──────────────────────────── */
-  const visibleSlots = useMemo(() => {
-    const slots: { project: (typeof behanceProjects)[0]; offset: number; gridIndex: number; id: number }[] = [];
-    for (let i = -1; i <= 1; i++) {
-      const idx = ((currentIndex + i) % total + total) % total;
-      slots.push({ project: behanceProjects[idx], offset: i, gridIndex: idx, id: idx });
+  const handleDragEnd = (e: any, info: PanInfo) => {
+    const offset = info.offset.x;
+    if (offset > 80 && currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    } else if (offset < -80 && currentIndex < behanceProjects.length - 1) {
+      setCurrentIndex(prev => prev + 1);
     }
-    return slots;
-  }, [currentIndex, total]);
-
-  /* ── Navigation ───────────────────────────────── */
-  const goNext = useCallback(() => {
-    setCurrentIndex((prev) => ((prev + 1) % total + total) % total);
-  }, [total]);
-
-  const goPrev = useCallback(() => {
-    setCurrentIndex((prev) => ((prev - 1) % total + total) % total);
-  }, [total]);
-
-  const goTo = useCallback((idx: number) => {
-    if (idx >= 0 && idx < total) setCurrentIndex(idx);
-  }, [total]);
-
-  const handleDragEnd = useCallback(
-    (_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
-      setIsDragging(false);
-      const threshold = 50;
-      if (info.offset.x < -threshold || info.velocity.x < -250) goNext();
-      else if (info.offset.x > threshold || info.velocity.x > 250) goPrev();
-    },
-    [goNext, goPrev]
-  );
-
-  /* ── Keyboard nav ─────────────────────────────── */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goPrev();
-      else if (e.key === 'ArrowRight') goNext();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [goNext, goPrev]);
-
-  const palette = projectPalettes[currentIndex % projectPalettes.length];
+  };
 
   return (
-    <div
-      className={styles.container}
-      data-cursor="project"
-      style={{ '--accent': palette.accent, '--glow': palette.glow } as React.CSSProperties}
-    >
-      {/* ── Floating ambient particles ──────────── */}
-      <div className={styles.particles}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className={styles.particle}
-            style={{
-              left: `${5 + ((i * 17) % 90)}%`,
-              top: `${8 + ((i * 23) % 84)}%`,
-              width: `${1.5 + (i % 3) * 1.5}px`,
-              height: `${1.5 + (i % 3) * 1.5}px`,
-            }}
-            animate={{
-              y: [0, -(14 + (i % 10) * 4), 0],
-              x: [0, (i % 2 === 0 ? 1 : -1) * (4 + (i % 6) * 2), 0],
-              opacity: [0.15, 0.6, 0.15],
-            }}
-            transition={{
-              duration: 4 + (i % 5) * 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.4,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* ── Main carousel ──────────────────────── */}
-      <div className={styles.carousel} ref={constraintsRef}>
-        {/* Background ambient glow behind center */}
-        <motion.div
-          className={styles.centerGlow}
-          animate={{ opacity: [0.3, 0.7, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        {visibleSlots.map(({ project, offset, id }) => {
-          const isCenter = offset === 0;
-          const xPos = offset * 360;
-          const cardScale = isCenter ? 1 : 0.55;
-          const cardOpacity = isCenter ? 1 : 0.6;
-          const cardBlur = isCenter ? 0 : 5;
-          const zIdx = isCenter ? 10 : 5 - Math.abs(offset);
-          const pal = projectPalettes[id % projectPalettes.length];
-
+    <div className={styles.scene}>
+      <motion.div 
+        className={styles.deckContainer}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+      >
+        {behanceProjects.map((project, index) => {
+          const relativeIndex = index - currentIndex;
+          
           return (
-            <motion.div
-              key={id}
-              layout
-              className={`${styles.card} ${isCenter ? styles.centerCard : styles.sideCard} ${isDragging && isCenter ? styles.dragging : ''} interactive`}
-              style={{ zIndex: zIdx } as React.CSSProperties}
-              initial={false}
-              animate={{
-                x: xPos,
-                scale: cardScale,
-                opacity: cardOpacity,
-                filter: `blur(${cardBlur}px)`,
-              }}
-              transition={springSmooth}
-              whileHover={isCenter ? {
-                scale: 1.02,
-                boxShadow: '0 60px 200px rgba(0,0,0,0.65), 0 0 80px var(--glow)',
-                transition: { duration: 0.5, ease: [0.19, 1, 0.22, 1] },
-              } : {
-                scale: cardScale * 1.04,
-                transition: { duration: 0.35, ease: [0.19, 1, 0.22, 1] },
-              }}
-              drag={isCenter ? 'x' : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.35}
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={handleDragEnd}
-              whileDrag={isCenter ? { scale: 0.94, transition: { duration: 0.08 } } : undefined}
-            >
-              {/* Card background layer */}
-              <div
-                className={styles.cardBg}
-                style={{
-                  background: `linear-gradient(145deg, ${pal.bg[0]}, ${pal.bg[1]})`,
-                }}
-              />
-
-              {/* Shine sweep */}
-              <div className={styles.shine} />
-
-              {/* Glow ring on center card */}
-              {isCenter && <div className={styles.cardGlow} />}
-
-              {/* ── SIDE CARD: visual-only preview ───── */}
-              {!isCenter && (
-                <div className={styles.sidePreview}>
-                  <CoverImage src={project.coverUrl} alt={project.title} />
-                  <div className={styles.sideOverlay} />
-                  <div className={styles.sideTitle}>
-                    {project.title.length > 30
-                      ? project.title.slice(0, 28) + '…'
-                      : project.title}
-                  </div>
-                </div>
-              )}
-
-              {/* ── CENTER CARD: full preview ────────── */}
-              {isCenter && (
-                <div className={styles.centerInner}>
-                  {/* Full-bleed cover image */}
-                  <CoverImage src={project.coverUrl} alt={project.title} />
-
-                  {/* Gradient overlay for readability */}
-                  <div className={styles.centerOverlay} />
-
-                  {/* Content overlay */}
-                  <div className={styles.centerContent}>
-                    {/* Top zone: type badge */}
-                    <div className={styles.typeBadge}>
-                      <span className={styles.typeDot} />
-                      {project.type}
-                    </div>
-
-                    {/* Title */}
-                    <h2 className={styles.title}>{project.title}</h2>
-
-                    {/* Description */}
-                    <p className={styles.description}>{project.description}</p>
-
-                    {/* Action row */}
-                    <div className={styles.actions}>
-                      <a
-                        href={project.behanceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.viewBtn}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        View on Behance
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-                          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </a>
-
-                      {/* Prev/Next */}
-                      <div className={styles.navBtns}>
-                        <button
-                          className={`${styles.navBtn} interactive`}
-                          onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                          aria-label="Previous project"
-                        >
-                          <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-                            <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
-                        <button
-                          className={`${styles.navBtn} interactive`}
-                          onClick={(e) => { e.stopPropagation(); goNext(); }}
-                          aria-label="Next project"
-                        >
-                          <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-                            <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </motion.div>
+            <TiltCard 
+              key={project.id}
+              project={project}
+              isActive={relativeIndex === 0}
+              relativeIndex={relativeIndex}
+              onClick={() => setCurrentIndex(index)}
+            />
           );
         })}
-      </div>
-
-      {/* ── Navigation dots ────────────────────── */}
-      <div className={styles.navDots}>
-        {behanceProjects.map((_, idx) => (
-          <button
-            key={idx}
-            className={`${styles.dot} ${idx === currentIndex ? styles.dotActive : ''}`}
-            onClick={() => goTo(idx)}
-            aria-label={`Go to project ${idx + 1}`}
-          />
-        ))}
-      </div>
+      </motion.div>
+      <div className={styles.hintLabel}>drag to cycle • click to select • hover to tilt</div>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './LeftNav.module.css';
+import { askAgent } from '@/lib/agentLogic';
 
 interface LeftNavProps {
   activeSection: number;
@@ -22,6 +23,8 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
+  const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   const card1Ref = useRef<HTMLDivElement>(null);
   const optionARef = useRef<HTMLDivElement>(null);
@@ -83,7 +86,21 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const handleCloseSearch = useCallback(() => {
     setSearchOpen(false);
     setCard1Closing(true);
+    setSearchQuery('');
+    setAnswer(null);
+    setIsSearching(false);
   }, []);
+
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    setAnswer(null);
+    setTimeout(() => {
+      const res = askAgent(searchQuery);
+      setAnswer({ text: res.answer, generic: res.generic });
+      setIsSearching(false);
+    }, 600);
+  }, [searchQuery]);
 
   // ── Card fan-out transforms ──
   const getCardAnimate = (cardNum: number) => {
@@ -228,7 +245,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
                 left: searchTarget.left,
                 top: searchTarget.top,
                 width: 880,
-                height: 120,
+                height: (answer || isSearching) ? 380 : 120,
                 borderRadius: '30px',
               }}
               exit={{
@@ -249,14 +266,51 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
                   placeholder="Ask about me.."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                 />
-                <button className={styles.searchButton}>
+                <button className={styles.searchButton} onClick={handleSearch}>
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
                     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                     <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>
+
+              {/* ── Search Results Area ── */}
+              <AnimatePresence>
+                {(answer || isSearching) && (
+                  <motion.div
+                    className={styles.searchResults}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isSearching ? (
+                      <motion.div 
+                        className={styles.searchStatus}
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                      >
+                        Analyzing document...
+                      </motion.div>
+                    ) : (
+                      <>
+                        <div className={styles.searchStatus}>Agent Response</div>
+                        <div className={styles.searchAnswer}>{answer?.text}</div>
+                        {answer?.generic && (
+                          <div className={styles.searchContactBtn}>
+                            Contact Me
+                            <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+                              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         )}

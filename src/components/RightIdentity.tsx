@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './RightIdentity.module.css';
+import SignatureAnimation from './SignatureAnimation';
 
 interface RightIdentityProps {
   activeSection: number;
@@ -79,11 +80,7 @@ export default function RightIdentity({ activeSection }: RightIdentityProps) {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.3 + lines.length * 0.04 }}
             >
-              <img 
-                src="/images/signature.png" 
-                alt="Signature" 
-                className={styles.signatureImg}
-              />
+              <SignatureAnimation />
             </motion.div>
           </motion.div>
         )}
