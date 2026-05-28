@@ -126,7 +126,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
         const systemPrompt = `Speak in the first person ("I", "my", "me") as Shubham Roy. Keep answers under 3 sentences. Info: Senior UI/UX Designer, Kolkata, India. Experience: ${exp}. Email: portfolioshubham787@gmail.com. Phone: +91 8759334402. Specializations: SaaS Dashboards, AI Product Interfaces. Focus on product thinking.`;
 
         // Direct client fetch to Gemini API
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${clientKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${clientKey}`;
         const response = await fetch(geminiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
