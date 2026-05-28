@@ -96,6 +96,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     setAnswer(null);
     
     try {
+      // 1. Try secure Serverless API route (Vercel / SSR hosting)
       const response = await fetch('/api/ask', {
         method: 'POST',
         headers: {
@@ -107,17 +108,55 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
       if (response.ok) {
         const res = await response.json();
         setAnswer({ text: res.answer, generic: res.generic });
-      } else {
-        // Fallback to local rule if server returns an error
-        const { askAgent } = await import('@/lib/agentLogic');
-        const res = askAgent(searchQuery);
-        setAnswer({ text: res.answer, generic: res.generic });
+        setIsSearching(false);
+        return;
       }
-    } catch (error) {
-      console.error("API error, falling back to local search:", error);
+    } catch (serverError) {
+      console.warn("Serverless route /api/ask unavailable, trying static client fallback...", serverError);
+    }
+
+    // 2. Client-side static fallback (useful for static hosts like Firebase or GitHub Pages)
+    const clientKey = process.env.NEXT_PUBLIC_PORTFOLIO_API_KEY;
+    if (clientKey) {
+      try {
+        const { getExperienceDuration, formatExperience } = await import('@/lib/dateUtils');
+        const { profileData } = await import('@/lib/profileData');
+        const exp = formatExperience(getExperienceDuration(profileData.experienceStart));
+
+        const systemPrompt = `Speak in the first person ("I", "my", "me") as Shubham Roy. Keep answers under 3 sentences. Info: Senior UI/UX Designer, Kolkata, India. Experience: ${exp}. Email: portfolioshubham787@gmail.com. Phone: +91 8759334402. Specializations: SaaS Dashboards, AI Product Interfaces. Focus on product thinking.`;
+
+        // Direct client fetch to Gemini API
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${clientKey}`;
+        const response = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${systemPrompt}\n\nUser Question: ${searchQuery}` }] }]
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (text) {
+            setAnswer({ text, generic: false });
+            setIsSearching(false);
+            return;
+          }
+        }
+      } catch (clientApiError) {
+        console.error("Client-side direct API query failed:", clientApiError);
+      }
+    }
+
+    // 3. Local offline keyword matching fallback
+    try {
       const { askAgent } = await import('@/lib/agentLogic');
       const res = askAgent(searchQuery);
       setAnswer({ text: res.answer, generic: res.generic });
+    } catch (error) {
+      console.error("Fallback error, falling back to basic prompt:", error);
+      setAnswer({ text: "I couldn't load a live answer, but I would love to connect and chat directly!", generic: true });
     } finally {
       setIsSearching(false);
     }
