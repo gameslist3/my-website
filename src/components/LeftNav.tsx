@@ -77,7 +77,8 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     if (card1Ref.current) {
       const rect = card1Ref.current.getBoundingClientRect();
       setSearchOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
-      setSearchTarget({ left: window.innerWidth / 2 - 440, top: window.innerHeight / 2 - 200 });
+      const targetWidth = Math.min(880, window.innerWidth * 0.9);
+      setSearchTarget({ left: (window.innerWidth - targetWidth) / 2, top: window.innerHeight / 2 - 200 });
     }
     setSearchOpen(true);
   }, []);
@@ -381,7 +382,6 @@ ${profileData.longTermGoals}
               animate={{
                 left: searchTarget.left,
                 top: searchTarget.top,
-                width: 880,
                 height: (answer || isSearching) ? 380 : 120,
                 borderRadius: '30px',
               }}
@@ -396,11 +396,6 @@ ${profileData.longTermGoals}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.searchContent}>
-                <button className={styles.closeModalBtn} onClick={() => { setCard1Closing(true); setSearchOpen(false); setTimeout(() => setCard1Closing(false), 500); }}>
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-                    <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
                 <input
                   ref={inputRef}
                   type="text"

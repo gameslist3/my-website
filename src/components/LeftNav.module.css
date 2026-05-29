@@ -561,45 +561,11 @@
     font-size: 18px;
   }
   
-  .closeModalBtn {
-    display: flex;
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.6);
-    align-items: center;
-    justify-content: center;
-    z-index: 120;
-  }
 }
 
 @media (min-width: 769px) {
-  .closeModalBtn {
-    display: flex;
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.6);
-    align-items: center;
-    justify-content: center;
-    z-index: 120;
-    cursor: none;
-    transition: all 0.3s ease;
-  }
-  .closeModalBtn:hover {
-    background: rgba(178, 245, 72, 0.1);
-    color: #B2F548;
-    border-color: rgba(178, 245, 72, 0.3);
+  .searchModal {
+    width: min(880px, 90vw) !important;
   }
 }
 
