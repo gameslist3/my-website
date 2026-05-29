@@ -182,7 +182,7 @@ export default function VideoManager({ onMidpointReached, activeSection }: { onM
   }, [isVideoLoaded]);
 
   return (
-    <div className={`${styles.videoContainer} ${activeSection > 1 ? styles.dimmed : ''}`}>
+    <div className={`${styles.videoContainer} ${activeSection > 1 ? styles.dimmed : ''} ${isVideoLoaded ? styles.loaded : ''}`}>
       {/* WebGL Canvas that displays both background video and portrait with fluid distortion */}
       <canvas ref={canvasRef} className={styles.canvas} />
 
