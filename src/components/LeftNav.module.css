@@ -1,6 +1,6 @@
 .leftNav {
   position: fixed;
-  left: 20px;
+  left: -60px;
   top: 12%;
   z-index: 9999; /* Increased to ensure it stays above 3D project cards */
   display: flex;
@@ -418,6 +418,7 @@
   padding-left: 16px;
   margin-left: 24px;
   margin-top: 80px;
+  bottom: -100px;
 }
 
 .progressLine {
