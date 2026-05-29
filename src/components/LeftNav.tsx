@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './LeftNav.module.css';
+import ResumeModal from './ResumeModal';
 
 interface LeftNavProps {
   activeSection: number;
@@ -20,12 +21,15 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [searchOpen, setSearchOpen] = useState(false);
   const [card1Closing, setCard1Closing] = useState(false);
   const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const [resumeOrigin, setResumeOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
   const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
   const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
   const optionARef = useRef<HTMLDivElement>(null);
   const optionBRef = useRef<HTMLDivElement>(null);
   const optionCRef = useRef<HTMLDivElement>(null);
@@ -53,7 +57,16 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   // ── Social card hold interaction ──
   useEffect(() => {
     if (!holding) return;
-    const handleUp = () => { setHolding(false); setActiveOption(null); };
+    const handleUp = () => { 
+      setHolding(false); 
+      setActiveOption(prev => {
+        if (prev === 'a') window.open('https://www.linkedin.com/in/shubham-roy-4a186920a/', '_blank');
+        else if (prev === 'b') window.open('https://www.behance.net/shubhamroy4', '_blank');
+        else if (prev === 'c') window.open('https://dribbble.com/', '_blank');
+        else if (prev === 'd') window.open('mailto:portfolioshubham787@gmail.com', '_self');
+        return null;
+      });
+    };
     const handleMove = (e: MouseEvent) => {
       const inside = (ref: React.RefObject<HTMLDivElement | null>) => {
         if (!ref.current) return false;
@@ -81,6 +94,14 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
       setSearchTarget({ left: (window.innerWidth - targetWidth) / 2, top: window.innerHeight / 2 - 200 });
     }
     setSearchOpen(true);
+  }, []);
+
+  const handleResumeClick = useCallback(() => {
+    if (card2Ref.current) {
+      const rect = card2Ref.current.getBoundingClientRect();
+      setResumeOrigin({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+    }
+    setResumeOpen(true);
   }, []);
 
   const handleCloseSearch = useCallback(() => {
@@ -276,6 +297,8 @@ ${profileData.longTermGoals}
 
           {/* ── CARD 2 — Resume ── */}
           <motion.div
+            ref={card2Ref}
+            onClick={handleResumeClick}
             className={`${styles.card} ${styles.card2} ${hoveredCard === 2 ? styles.cardGreen : ''} interactive`}
             animate={getCardAnimate(2)}
             transition={{ duration: 0.8, ease }}
@@ -330,6 +353,13 @@ ${profileData.longTermGoals}
         </motion.div>
       </div>
 
+      {/* ── Resume Modal ── */}
+      <AnimatePresence>
+        {resumeOpen && (
+          <ResumeModal onClose={() => setResumeOpen(false)} originRect={resumeOrigin} />
+        )}
+      </AnimatePresence>
+
       {/* ── Mobile Stack (visible only on mobile) ── */}
       <div className={styles.mobileStack}>
         <div className={styles.mobileBtn} onClick={handleAskClick}>
@@ -338,7 +368,7 @@ ${profileData.longTermGoals}
             <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
-        <div className={styles.mobileBtn} onClick={() => setActiveSection(2)}>
+        <div className={styles.mobileBtn} onClick={handleResumeClick}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
             <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" />
             <path d="M9 13h6M9 17h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
