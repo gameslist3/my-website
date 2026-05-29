@@ -128,14 +128,14 @@
   }
 
   .aboutText {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13px;
+    line-height: 1.4;
     text-align: center;
   }
 
   .projectsContainer {
     max-width: 100%;
-    gap: 24px;
+    gap: 16px;
     align-items: center;
   }
   
@@ -145,8 +145,8 @@
   }
   
   .signatureContainer {
-    width: 160px;
-    margin-top: 24px;
+    width: 120px;
+    margin-top: 16px;
     align-self: center;
   }
 }

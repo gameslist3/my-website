@@ -25,11 +25,11 @@
   font-family: 'Bagel Fat One', cursive;
   font-size: clamp(80px, 18vw, 240px);
   font-weight: 400;
-  background: linear-gradient(180deg, #191919 26.7%, #0D0D0D 83.2%);
+  background: linear-gradient(180deg, rgba(25, 25, 25, 0.3) 0%, rgba(13, 13, 13, 0) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.04);
   letter-spacing: -0.02em;
   line-height: 0.85;
   white-space: nowrap;

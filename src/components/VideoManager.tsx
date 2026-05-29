@@ -8,6 +8,7 @@ import styles from './VideoManager.module.css';
 
 export default function VideoManager({ onMidpointReached, activeSection }: { onMidpointReached?: () => void; activeSection: number }) {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [midpointReached, setMidpointReached] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Hidden video elements used as textures
@@ -94,6 +95,13 @@ export default function VideoManager({ onMidpointReached, activeSection }: { onM
           const zoomDuration = duration * 0.50;
           const progress = Math.min(cTime / zoomDuration, 1.0);
           currentZoom = 0.5 + 0.5 * progress;
+
+          // Notify parent exactly once when we hit the 50% midpoint
+          if (cTime >= zoomDuration && !midpointNotified.current) {
+            midpointNotified.current = true;
+            setMidpointReached(true);
+            onMidpointReached?.();
+          }
         } else {
           // Before metadata loaded — stay zoomed out
           currentZoom = 0.5;
@@ -182,7 +190,7 @@ export default function VideoManager({ onMidpointReached, activeSection }: { onM
   }, [isVideoLoaded]);
 
   return (
-    <div className={`${styles.videoContainer} ${activeSection > 1 ? styles.dimmed : ''} ${isVideoLoaded ? styles.loaded : ''}`}>
+    <div className={`${styles.videoContainer} ${activeSection > 1 ? styles.dimmed : ''} ${midpointReached ? styles.loaded : ''}`}>
       {/* WebGL Canvas that displays both background video and portrait with fluid distortion */}
       <canvas ref={canvasRef} className={styles.canvas} />
 

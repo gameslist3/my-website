@@ -39,17 +39,17 @@
   .videoContainer {
     top: 0;
     height: 100vh;
-    transform-origin: center center;
-    transform: scale(0.85);
+    transform: translateY(0);
     background-color: transparent;
-    transition: height 1.2s cubic-bezier(0.19, 1, 0.22, 1), transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1);
   }
   .videoContainer.loaded {
-    height: 55vh;
-    transform: scale(1);
-    transform-origin: top center;
+    transform: translateY(-22vh); /* lift up smoothly */
   }
   .canvas {
     height: 100%;
+  }
+  .vignette {
+    background: linear-gradient(to top, rgba(13, 13, 13, 1) 15%, rgba(13, 13, 13, 0) 60%);
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CursorProvider } from '@/context/CursorContext';
 import Cursor from '@/components/Cursor';
 import VideoManager from '@/components/VideoManager';
@@ -124,11 +125,20 @@ export default function Home() {
             </div>
 
             {/* Work Showcase — full width overlay for section 2 */}
-            {activeSection === 2 && (
-              <div className={styles.workSection}>
-                <WorkShowcase />
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {activeSection === 2 && (
+                <motion.div 
+                  key="work-showcase"
+                  className={styles.workSection}
+                  initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -45, filter: 'blur(12px)' }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <WorkShowcase />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <BottomArea activeSection={activeSection} setActiveSection={setActiveSection} />
           </>
