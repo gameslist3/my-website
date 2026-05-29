@@ -49,7 +49,7 @@ export default function ResumeModal({ onClose, originRect }: ResumeModalProps) {
         <div className={styles.header}>
           <div className={styles.title}>Resume</div>
           <div className={styles.actions}>
-            <a href="/resume.pdf" download="Shubham_Roy_Resume.pdf" className={`${styles.actionBtn} ${styles.downloadBtn}`}>
+            <a href="/personal%20portfolio.pdf" download="Shubham_Roy_Portfolio.pdf" className={`${styles.actionBtn} ${styles.downloadBtn}`}>
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
                 <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -64,7 +64,7 @@ export default function ResumeModal({ onClose, originRect }: ResumeModalProps) {
           </div>
         </div>
         <div className={styles.pdfContainer}>
-          <iframe src="/resume.pdf" className={styles.pdfViewer} title="Resume PDF" />
+          <iframe src="/personal%20portfolio.pdf" className={styles.pdfViewer} title="Resume PDF" />
         </div>
       </motion.div>
     </>
