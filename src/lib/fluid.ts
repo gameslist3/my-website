@@ -209,7 +209,6 @@ export class FluidSimulation {
         uniform float u_time;
         uniform float u_zoom_out;
         uniform float u_edge_feather;
-
         // Cursor color reveal uniforms
         uniform vec2 u_cursor;
         uniform float u_cursor_size;
@@ -601,7 +600,6 @@ export class FluidSimulation {
       gl.uniform1f(disp.uniforms.u_disturb_power, params.distortionPower * 0.08);
       gl.uniform1f(disp.uniforms.u_zoom_out, (cursor as any).zoomOut ?? 1.0);
       gl.uniform1f(disp.uniforms.u_edge_feather, (cursor as any).edgeFeather ?? 0.08);
-
       gl.uniform1i(disp.uniforms.u_output_texture, this.dyeFBO.read().attach(1));
       gl.uniform1i(disp.uniforms.u_velocity_texture, this.velocityFBO.read().attach(2));
       gl.uniform1i(disp.uniforms.u_video_texture, 3); // bind unit 3

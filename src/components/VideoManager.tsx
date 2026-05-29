@@ -103,9 +103,10 @@ export default function VideoManager({ onMidpointReached, activeSection }: { onM
       }
 
       // Compute edge feathering from zoom level — more feather when zoomed out
-      // No feather at all on the main video (after-load.mp4)
-      // Generous feathering starting at 1.9 down to 0.4 to prevent any visible square edges
-      const edgeFeather = isVideoLoaded ? 0.0 : 0.4 + (1.0 / Math.max(currentZoom, 0.1) - 1.0) * 1.5;
+      // No feather on main video; only during loading animation
+      const edgeFeather = isVideoLoaded
+        ? 0.0
+        : Math.max(0.0, 0.4 + (1.0 / Math.max(currentZoom, 0.1) - 1.0) * 1.5);
 
       // Notify when midpoint is reached (zoom hits 1.0)
       if (currentZoom >= 1.0 && !midpointNotified.current) {

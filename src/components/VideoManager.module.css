@@ -33,3 +33,16 @@
   pointer-events: none;
   z-index: 2;
 }
+
+/* ── Mobile Responsiveness ─────────────────────────── */
+@media (max-width: 768px) {
+  .videoContainer {
+    top: 0;
+    height: 55vh;
+    transform: none;
+    background-color: transparent;
+  }
+  .canvas {
+    height: 100%;
+  }
+}

@@ -19,7 +19,6 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [activeOption, setActiveOption] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [card1Closing, setCard1Closing] = useState(false);
-  const [mobileExpanded, setMobileExpanded] = useState(false);
   const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -237,14 +236,13 @@ ${profileData.longTermGoals}
   };
 
   return (
-    <div className={`${styles.leftNav} ${mobileExpanded ? styles.expanded : ''}`}>
+    <div className={styles.leftNav}>
       {/* Ambient neon-green glow in corners */}
       <div className={styles.ambientGlow} />
 
       {/* ── Stacked Cards ── */}
       <div
         className={styles.stack}
-        onClick={() => setMobileExpanded(!mobileExpanded)}
         onMouseEnter={() => setStackHovered(true)}
         onMouseLeave={() => { setStackHovered(false); setHoveredCard(null); }}
       >
@@ -331,6 +329,32 @@ ${profileData.longTermGoals}
         </motion.div>
       </div>
 
+      {/* ── Mobile Stack (visible only on mobile) ── */}
+      <div className={styles.mobileStack}>
+        <div className={styles.mobileBtn} onClick={handleAskClick}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+            <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </div>
+        <div className={styles.mobileBtn} onClick={() => setActiveSection(2)}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+            <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="2" />
+            <path d="M9 13h6M9 17h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          <span className={styles.mobileBtnText}>CV</span>
+        </div>
+        <div className={styles.mobileBtn} onClick={() => setActiveSection(5)}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </div>
+      </div>
+
       {/* ── Search Modal (morph overlay) ── */}
       <AnimatePresence onExitComplete={() => setCard1Closing(false)}>
         {searchOpen && (
@@ -372,11 +396,16 @@ ${profileData.longTermGoals}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.searchContent}>
+                <button className={styles.closeModalBtn} onClick={() => { setCard1Closing(true); setSearchOpen(false); setTimeout(() => setCard1Closing(false), 500); }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                    <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
                 <input
                   ref={inputRef}
                   type="text"
                   className={styles.searchInput}
-                  placeholder="Ask about me.."
+                  placeholder="Ask anything..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}

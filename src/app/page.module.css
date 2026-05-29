@@ -45,7 +45,7 @@
 @media (max-width: 768px) {
   .uiLayer {
     padding: 24px;
-    padding-bottom: 40px;
+    padding-bottom: 15vh; /* enough space for bottom nav */
     align-items: flex-end;
   }
 }

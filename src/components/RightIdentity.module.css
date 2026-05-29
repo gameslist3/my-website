@@ -123,22 +123,31 @@
 @media (max-width: 768px) {
   .rightIdentity {
     max-width: 100%;
-    align-items: flex-end;
+    align-items: center;
+    text-align: center;
   }
 
   .aboutText {
     font-size: 14px;
     line-height: 1.6;
+    text-align: center;
   }
 
   .projectsContainer {
     max-width: 100%;
     gap: 24px;
+    align-items: center;
+  }
+  
+  .projectItem {
+    align-items: center;
+    text-align: center;
   }
   
   .signatureContainer {
     width: 160px;
     margin-top: 24px;
+    align-self: center;
   }
 }
 
