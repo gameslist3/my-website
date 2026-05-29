@@ -38,8 +38,9 @@
 @media (max-width: 768px) {
   .videoContainer {
     top: 0;
-    height: 55vh;
-    transform: none;
+    height: 100vh;
+    transform-origin: center center;
+    transform: scale(0.85);
     background-color: transparent;
   }
   .canvas {

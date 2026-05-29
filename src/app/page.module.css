@@ -44,8 +44,10 @@
 /* ── Mobile Responsiveness ─────────────────────────── */
 @media (max-width: 768px) {
   .uiLayer {
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
     padding: 24px;
-    padding-bottom: 15vh; /* enough space for bottom nav */
-    align-items: flex-end;
+    padding-bottom: 16vh;
   }
 }
