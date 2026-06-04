@@ -27,8 +27,8 @@
   flex: 1;
 }
 
-/* ── Work Section (full-screen card overlay) ──────── */
-.workSection {
+/* ── Section Overlay (full-screen) ──────── */
+.sectionOverlay {
   position: fixed;
   top: 0;
   right: 0;

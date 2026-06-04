@@ -1,0 +1,431 @@
+/* ══════════════════════════════════════════════════
+   INTERACTIVE SOCIAL HUB — Full-Screen
+   ══════════════════════════════════════════════════ */
+
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  background: #080808;
+}
+
+/* ══════════════════════════════════════════════════
+   BACKGROUND DECORATIONS
+   ══════════════════════════════════════════════════ */
+
+.bgDecorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bgOrbitRing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70vmin;
+  height: 70vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(178, 245, 72, 0.05);
+  box-shadow:
+    0 0 40px rgba(178, 245, 72, 0.02),
+    inset 0 0 40px rgba(178, 245, 72, 0.02);
+}
+
+.bgOrbitRing::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(178, 245, 72, 0.25);
+  box-shadow: 0 0 10px rgba(178, 245, 72, 0.2);
+  transform: translateX(-50%);
+}
+
+.bgOrbitRingInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50vmin;
+  height: 50vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(178, 245, 72, 0.03);
+}
+
+.bgOrbitRingInner::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(178, 245, 72, 0.15);
+  transform: translateX(50%);
+}
+
+.bgGlowOrb {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50vmax;
+  height: 50vmax;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    rgba(178, 245, 72, 0.06) 0%,
+    rgba(178, 245, 72, 0.02) 40%,
+    transparent 70%
+  );
+}
+
+.bgGrid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image:
+    linear-gradient(rgba(178, 245, 72, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(178, 245, 72, 0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ══════════════════════════════════════════════════
+   SECTION TITLE
+   ══════════════════════════════════════════════════ */
+
+.sectionTitle {
+  position: absolute;
+  top: clamp(24px, 4vh, 48px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Inconsolata', monospace;
+  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════
+   HANGING AREA
+   ══════════════════════════════════════════════════ */
+
+.hangingArea {
+  position: relative;
+  z-index: 2;
+  width: 80%;
+  max-width: 900px;
+  height: 60%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5vh;
+}
+
+.hangingGroup {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: gentleSwing 5s ease-in-out infinite;
+  animation-delay: var(--swing-delay, 0s);
+}
+
+@keyframes gentleSwing {
+  0%, 100% {
+    transform: translateX(-50%) rotate(2deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(-2deg);
+  }
+}
+
+/* ── Hanging Line ──────────────────────────── */
+
+.hangingLine {
+  width: 1.5px;
+  flex: 1;
+  min-height: 80px;
+  max-height: 180px;
+  background: linear-gradient(
+    to bottom,
+    rgba(178, 245, 72, 0.08) 0%,
+    rgba(178, 245, 72, 0.3) 50%,
+    rgba(178, 245, 72, 0.15) 100%
+  );
+  position: relative;
+}
+
+.lineGlow {
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(178, 245, 72, 0.4) 40%,
+    rgba(178, 245, 72, 0.6) 50%,
+    rgba(178, 245, 72, 0.4) 60%,
+    transparent 100%
+  );
+  filter: blur(6px);
+  border-radius: 4px;
+}
+
+/* ── Icon Card ─────────────────────────────── */
+
+.iconCard {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.5);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease,
+    color 0.4s ease;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.iconCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.iconCard:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(178, 245, 72, 0.3);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(178, 245, 72, 0.12);
+  color: #b2f548;
+}
+
+.iconWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrap svg {
+  width: 32px;
+  height: 32px;
+}
+
+.cardGlowRing {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(178, 245, 72, 0.2);
+  box-shadow: 0 0 20px rgba(178, 245, 72, 0.1);
+  pointer-events: none;
+}
+
+/* ── Platform Label ────────────────────────── */
+
+.platformLabel {
+  font-family: 'Inconsolata', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════
+   CTA BUTTON
+   ══════════════════════════════════════════════════ */
+
+.ctaArea {
+  position: absolute;
+  bottom: clamp(80px, 10vh, 110px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  border-radius: 100px;
+  background: linear-gradient(
+    135deg,
+    rgba(178, 245, 72, 0.15) 0%,
+    rgba(178, 245, 72, 0.08) 100%
+  );
+  border: 1px solid rgba(178, 245, 72, 0.25);
+  color: #b2f548;
+  font-family: 'Inconsolata', monospace;
+  font-size: clamp(14px, 1.1vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(178, 245, 72, 0.08);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.ctaButton:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(178, 245, 72, 0.25) 0%,
+    rgba(178, 245, 72, 0.12) 100%
+  );
+  border-color: rgba(178, 245, 72, 0.5);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    0 0 50px rgba(178, 245, 72, 0.2);
+}
+
+.ctaText {
+  position: relative;
+  z-index: 1;
+}
+
+.ctaArrow {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — Tablet
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .hangingArea {
+    width: 90%;
+    height: 55%;
+    padding-top: 8vh;
+  }
+
+  .hangingLine {
+    min-height: 60px;
+    max-height: 120px;
+  }
+
+  .iconCard {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+  }
+
+  .iconWrap svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .platformLabel {
+    font-size: 11px;
+    margin-top: 10px;
+  }
+
+  .sectionTitle {
+    font-size: 12px;
+    top: clamp(16px, 3vh, 32px);
+  }
+
+  .ctaButton {
+    padding: 14px 28px;
+    font-size: 14px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — Mobile
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+  .hangingArea {
+    width: 95%;
+    height: 50%;
+    padding-top: 10vh;
+  }
+
+  .hangingLine {
+    min-height: 40px;
+    max-height: 80px;
+  }
+
+  .iconCard {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+
+  .iconWrap svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .platformLabel {
+    font-size: 10px;
+    margin-top: 8px;
+  }
+
+  .ctaButton {
+    padding: 12px 24px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .ctaArrow svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .sectionTitle {
+    display: none;
+  }
+}

@@ -10,6 +10,8 @@ import RightIdentity from '@/components/RightIdentity';
 import BottomArea from '@/components/BottomArea';
 import SoundManager from '@/components/SoundManager';
 import WorkShowcase from '@/components/WorkShowcase';
+import ExperienceShowcase from '@/components/ExperienceShowcase';
+import ProfileShowcase from '@/components/ProfileShowcase';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -121,7 +123,7 @@ export default function Home() {
             {/* Right + Bottom UI layer */}
             <div className={styles.uiLayer}>
               <div className={styles.spacer} />
-              {activeSection !== 2 && <RightIdentity activeSection={activeSection} />}
+              {activeSection !== 2 && activeSection !== 3 && activeSection !== 4 && <RightIdentity activeSection={activeSection} />}
             </div>
 
             {/* Work Showcase — full width overlay for section 2 */}
@@ -129,13 +131,45 @@ export default function Home() {
               {activeSection === 2 && (
                 <motion.div 
                   key="work-showcase"
-                  className={styles.workSection}
+                  className={styles.sectionOverlay}
                   initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                   exit={{ opacity: 0, y: -45, filter: 'blur(12px)' }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <WorkShowcase />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Experience Showcase — full width overlay for section 3 */}
+            <AnimatePresence mode="wait">
+              {activeSection === 3 && (
+                <motion.div 
+                  key="experience-showcase"
+                  className={styles.sectionOverlay}
+                  initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -45, filter: 'blur(12px)' }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ExperienceShowcase />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Profile Showcase — full width overlay for section 4 */}
+            <AnimatePresence mode="wait">
+              {activeSection === 4 && (
+                <motion.div 
+                  key="profile-showcase"
+                  className={styles.sectionOverlay}
+                  initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -45, filter: 'blur(12px)' }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ProfileShowcase />
                 </motion.div>
               )}
             </AnimatePresence>

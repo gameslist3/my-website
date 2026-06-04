@@ -117,9 +117,9 @@ export default function Cursor() {
         isIdle.current = true;
       }
 
-      // 50% bigger (126) when over video background, 84 otherwise
-      const activeSize = isOverVideoRef.current ? 126 : 84;
-      const targetSize = isIdle.current ? Math.max(activeSize * 0.65, 40) : activeSize;
+      // Default 80px on sections, 56px on interactive elements
+      const activeSize = isOverVideoRef.current ? 80 : 56;
+      const targetSize = isIdle.current ? Math.max(activeSize * 0.6, 32) : activeSize;
 
       // Write live state to shared singleton — read by VideoManager
       cursorState.x = displayX;
