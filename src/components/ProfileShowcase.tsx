@@ -1,17 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import styles from './ProfileShowcase.module.css';
 import { profileData } from '@/lib/profileData';
+import { DinoIcon } from './DinoIcon';
 
-/* ── Social Icons (inline SVGs) ───────────── */
-
-const BehanceIcon = () => (
-  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-    <path d="M6.98 3.5c.46 0 .89.035 1.28.14.39.07.71.216.995.391s.497.426.641.747c.14.32.216.711.216 1.137 0 .496-.106.922-.356 1.242-.215.32-.566.606-.997.817.606.176 1.067.496 1.348.922s.46.957.46 1.563c0 .496-.104.922-.284 1.278a2.3 2.3 0 0 1-.782.887c-.32.215-.711.39-1.137.496a5.3 5.3 0 0 1-1.278.176H2.33V3.5h4.65zm-.285 3.978c.39 0 .71-.105.957-.285.246-.18.355-.497.355-.887 0-.216-.035-.426-.105-.567a1 1 0 0 0-.32-.355 1.8 1.8 0 0 0-.461-.176c-.176-.035-.356-.035-.567-.035H4.5v2.31c0-.005 2.195-.005 2.195-.005zm.105 4.193c.215 0 .426-.035.606-.07.176-.035.356-.106.496-.216s.25-.215.356-.39c.07-.176.14-.391.14-.641 0-.496-.14-.852-.426-1.102-.285-.215-.676-.32-1.137-.32H4.5v2.734h2.3zm6.858-.035q.428.427 1.278.426c.39 0 .746-.106 1.032-.286q.426-.32.53-.64h1.74c-.286.851-.712 1.457-1.278 1.848-.566.355-1.243.566-2.06.566a4.1 4.1 0 0 1-1.527-.285 2.8 2.8 0 0 1-1.137-.782 2.85 2.85 0 0 1-.712-1.172c-.175-.461-.25-.957-.25-1.528 0-.531.07-1.032.25-1.493.18-.46.426-.852.747-1.207.32-.32.711-.606 1.137-.782a4 4 0 0 1 1.493-.285c.606 0 1.137.105 1.598.355.46.25.817.532 1.102.958.285.39.496.851.641 1.348.07.496.105.996.07 1.563h-5.15c0 .58.21 1.11.496 1.396m2.24-3.732c-.25-.25-.642-.391-1.103-.391-.32 0-.566.07-.781.176l-.605.285v2.883l.566.176c.215.07.461.105.747.105.426 0 .817-.14 1.137-.39.32-.25.496-.641.496-1.137 0-.532-.176-.922-.496-1.172"/>
-  </svg>
-);
+/* ── Inline SVG Social Icons ───────────── */
 
 const LinkedinIcon = () => (
   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
@@ -19,257 +14,467 @@ const LinkedinIcon = () => (
   </svg>
 );
 
+const BehanceIcon = () => (
+  <svg viewBox="1 1 22 22" width="28" height="28" fill="currentColor">
+    <path d="M6.98 3.5c.46 0 .89.035 1.28.14.39.07.71.216.995.391s.497.426.641.747c.14.32.216.711.216 1.137 0 .496-.106.922-.356 1.242-.215.32-.566.606-.997.817.606.176 1.067.496 1.348.922s.46.957.46 1.563c0 .496-.104.922-.284 1.278a2.3 2.3 0 0 1-.782.887c-.32.215-.711.39-1.137.496a5.3 5.3 0 0 1-1.278.176H2.33V3.5h4.65zm-.285 3.978c.39 0 .71-.105.957-.285.246-.18.355-.497.355-.887 0-.216-.035-.426-.105-.567a1 1 0 0 0-.32-.355 1.8 1.8 0 0 0-.461-.176c-.176-.035-.356-.035-.567-.035H4.5v2.31c0-.005 2.195-.005 2.195-.005zm.105 4.193c.215 0 .426-.035.606-.07.176-.035.356-.106.496-.216s.25-.215.356-.39c.07-.176.14-.391.14-.641 0-.496-.14-.852-.426-1.102-.285-.215-.676-.32-1.137-.32H4.5v2.734h2.3zm6.858-.035q.428.427 1.278.426c.39 0 .746-.106 1.032-.286q.426-.32.53-.64h1.74c-.286.851-.712 1.457-1.278 1.848-.566.355-1.243.566-2.06.566a4.1 4.1 0 0 1-1.527-.285 2.8 2.8 0 0 1-1.137-.782 2.85 2.85 0 0 1-.712-1.172c-.175-.461-.25-.957-.25-1.528 0-.531.07-1.032.25-1.493.18-.46.426-.852.747-1.207.32-.32.711-.606 1.137-.782a4 4 0 0 1 1.493-.285c.606 0 1.137.105 1.598.355.46.25.817.532 1.102.958.285.39.496.851.641 1.348.07.496.105.996.07 1.563h-5.15c0 .58.21 1.11.496 1.396m2.24-3.732c-.25-.25-.642-.391-1.103-.391-.32 0-.566.07-.781.176l-.605.285v2.883l.566.176c.215.07.461.105.747.105.426 0 .817-.14 1.137-.39.32-.25.496-.641.496-1.137 0-.532-.176-.922-.496-1.172"/>
+  </svg>
+);
+
+const GithubIcon = () => (
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+    <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+  </svg>
+);
+
 const EmailIcon = () => (
   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-    <path d="M12 12.713l11.985-8.713h-23.97l11.985 8.713zm0 2.574l-12-8.727v11.44h24v-11.44l-12 8.727z"/>
+    <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.691 2.28 24 3.434 24 5.457z"/>
   </svg>
 );
-
-const DribbbleIcon = () => (
-  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm8.487 7.15c.683 1.353 1.07 2.87 1.107 4.475-1.583-.34-3.21-.497-4.834-.457-.354-1.398-.79-2.77-1.306-4.09 1.83-1.042 3.614-1.428 5.033-1.472v1.544zm-2.073-2.09c-1.39.816-2.915 1.3-4.52 1.488-.857-1.558-1.85-3.04-2.96-4.42 2.37-.506 4.908.063 6.94 1.483l.54 1.45zm-9.358-1.564c1.196 1.442 2.25 2.993 3.142 4.622-1.99.197-3.955.704-5.836 1.5l.386-1.925c.574-1.637 1.54-3.14 2.825-4.323-.172.042-.34.086-.517.126zm-5.076 5.25c1.782-.72 3.655-1.18 5.572-1.365.176 1.305.244 2.628.2 3.945-2.02.665-3.972 1.536-5.82 2.585-.145-1.745.18-3.52 1.05-5.165zm1.5 8.163c1.79-1.096 3.69-2 5.66-2.695-.083 1.69-.328 3.364-.73 4.996-2.003-.52-3.83-1.55-5.31-2.986l.38.685zm7.397 3.013c.427-1.666.685-3.37.77-5.087 1.708.018 3.407.213 5.072.58-1.11 1.956-2.887 3.42-4.997 4.145l-.845.362zm6.27-5.914c-1.65-.333-3.32-.5-5-.497.55-1.31.99-2.65 1.31-4.015 1.6.035 3.19.22 4.75.55v1.278c-.062 1.052-.375 2.072-.916 2.985l-.144-.302z"/>
-  </svg>
-);
-
-/* ── Platform Icons Data ───────────────────── */
 
 interface Platform {
   id: string;
   name: string;
   url: string;
   icon: React.ReactNode;
-  color: string;
+  logicalX: number; // percentage based horizontal coordinate (0 - 100)
 }
 
-const PLATFORMS: Platform[] = [
-  {
-    id: 'behance',
-    name: 'Behance',
-    url: profileData.socials.behance,
-    icon: <BehanceIcon />,
-    color: '#1769FF',
-  },
+const HANGING_PLATFORMS: Platform[] = [
   {
     id: 'linkedin',
     name: 'LinkedIn',
     url: profileData.socials.linkedin,
     icon: <LinkedinIcon />,
-    color: '#0A66C2',
+    logicalX: 20,
+  },
+  {
+    id: 'behance',
+    name: 'Behance',
+    url: profileData.socials.behance,
+    icon: <BehanceIcon />,
+    logicalX: 40,
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    url: 'https://github.com/shubhamroy4',
+    icon: <GithubIcon />,
+    logicalX: 60,
   },
   {
     id: 'email',
     name: 'Email',
     url: `mailto:${profileData.contact.email}`,
     icon: <EmailIcon />,
-    color: '#EA4335',
-  },
-  {
-    id: 'dribbble',
-    name: 'Dribbble',
-    url: 'https://dribbble.com/',
-    icon: <DribbbleIcon />,
-    color: '#EA4C89',
+    logicalX: 80,
   },
 ];
 
-/* ── Hanging Card ──────────────────────────── */
-
-function HangingCard({
-  platform,
-  index,
-  total,
-}: {
-  platform: Platform;
-  index: number;
-  total: number;
-}) {
-  const [isHovered, setIsHovered] = useState(false);
-  const delay = index * 0.18;
-
-  // Calculate horizontal position spread evenly
-  const xPercent = total > 1 ? (index / (total - 1)) * 100 : 50;
-
-  return (
-    <motion.div
-      className={styles.hangingGroup}
-      initial={{ opacity: 0, y: -200 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 1.2,
-        delay,
-        ease: [0.19, 1, 0.22, 1],
-      }}
-      style={{
-        left: `${xPercent}%`,
-        '--swing-delay': `${index * 0.6}s`,
-      } as React.CSSProperties}
-    >
-      {/* Hanging line */}
-      <div className={styles.hangingLine}>
-        <motion.div
-          className={styles.lineGlow}
-          animate={
-            isHovered
-              ? { opacity: [0, 0.6, 0] }
-              : { opacity: 0 }
-          }
-          transition={{ duration: 1.2, repeat: isHovered ? Infinity : 0, ease: 'easeInOut' }}
-        />
-      </div>
-
-      {/* Icon Card */}
-      <motion.a
-        href={platform.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles.iconCard}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        whileHover={{
-          scale: 1.12,
-          y: -4,
-          transition: { type: 'spring', stiffness: 300, damping: 18 },
-        }}
-        whileTap={{ scale: 0.95 }}
-        style={
-          {
-            '--platform-color': platform.color,
-          } as React.CSSProperties
-        }
-      >
-        <motion.div
-          className={styles.iconWrap}
-          animate={
-            isHovered
-              ? {
-                  rotate: [0, -5, 5, -3, 3, 0],
-                  transition: { duration: 0.5, ease: 'easeInOut' },
-                }
-              : {}
-          }
-        >
-          {platform.icon}
-        </motion.div>
-
-        {/* Hover glow ring */}
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              className={styles.cardGlowRing}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1.15 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-            />
-          )}
-        </AnimatePresence>
-      </motion.a>
-
-      {/* Platform Label */}
-      <motion.span
-        className={styles.platformLabel}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: delay + 0.4, duration: 0.6 }}
-      >
-        {platform.name}
-      </motion.span>
-    </motion.div>
-  );
+interface Obstacle {
+  id: number;
+  x: number;
+  type: 'cactus' | 'bird';
+  width: number;
+  height: number;
+  y: number; // 0 for ground, high for birds
 }
-
-/* ── Background Decorations ───────────────── */
-
-function BackgroundDecorations() {
-  return (
-    <div className={styles.bgDecorations}>
-      <motion.div
-        className={styles.bgOrbitRing}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className={styles.bgOrbitRingInner}
-        animate={{ rotate: -360 }}
-        transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className={styles.bgGlowOrb}
-        animate={{ scale: [1, 1.2, 1], opacity: [0.08, 0.18, 0.08] }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <div className={styles.bgGrid} />
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════
-   MAIN COMPONENT
-   ══════════════════════════════════════════════════ */
 
 export default function ProfileShowcase() {
-  const [hoveredCta, setHoveredCta] = useState(false);
+  // Intro dropping state
+  const [dropped, setDropped] = useState(false);
+
+  // Game States
+  const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+
+  // Dino Coordinates
+  const [dinoX, setDinoX] = useState(10); // horizontal percentage (0 - 100)
+  const [dinoY, setDinoY] = useState(0); // pixels above ground path
+  const [isJumping, setIsJumping] = useState(false);
+  const dinoVelocityY = useRef(0);
+
+  // Key holding
+  const keysPressed = useRef<{ [key: string]: boolean }>({});
+
+  // Obstacles
+  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
+  const obstacleIdCounter = useRef(0);
+
+  // Physics State Ref to prevent stale closures and React re-renders interrupting the game loop
+  const physicsRef = useRef({
+    dinoX: 10,
+    dinoY: 0,
+    obstacles: [] as Obstacle[],
+    glowingCardId: null as string | null
+  });
+
+  // Visual glows on hanging cards
+  const [glowingCardId, setGlowingCardId] = useState<string | null>(null);
+
+  // Refs for tracking DOM and game loop
+  const containerRef = useRef<HTMLDivElement>(null);
+  const requestRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+  const obstacleSpawnTimer = useRef<number>(0);
+
+  // Open high score from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('dino_highscore');
+    if (saved) setHighScore(parseInt(saved, 10));
+    
+    // Trigger rope drop-down animation shortly after mount
+    const timer = setTimeout(() => setDropped(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Jump function
+  const triggerJump = () => {
+    if (!isJumping && gameState === 'playing') {
+      dinoVelocityY.current = 11; // smaller jump force
+      setIsJumping(true);
+    }
+  };
+
+  // Keyboard handlers
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysPressed.current[e.key] = true;
+
+      if (e.key === ' ') {
+        e.preventDefault(); // prevent page scroll
+        if (gameState === 'idle') {
+          startGame();
+        } else if (gameState === 'gameover') {
+          startGame();
+        } else {
+          triggerJump();
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.current[e.key] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameState, isJumping]);
+
+  const startGame = () => {
+    setGameState('playing');
+    setScore(0);
+    setDinoX(-10); // Start off-screen left
+    setDinoY(0);
+    setIsJumping(false);
+    setObstacles([]);
+    setGlowingCardId(null);
+    
+    physicsRef.current = {
+      dinoX: -10,
+      dinoY: 0,
+      obstacles: [],
+      glowingCardId: null
+    };
+
+    dinoVelocityY.current = 0;
+    lastTimeRef.current = null;
+    obstacleSpawnTimer.current = 0;
+  };
+
+  // Main run loops
+  useEffect(() => {
+    if (gameState !== 'playing') {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      return;
+    }
+
+    const gameLoop = (time: number) => {
+      if (!lastTimeRef.current) lastTimeRef.current = time;
+      const delta = Math.min((time - lastTimeRef.current) / 16.666, 4); // caps frame jumps
+      lastTimeRef.current = time;
+
+      // Update Score periodically to prevent React thrashing
+      if (Math.random() < 0.1) {
+        setScore(prev => {
+          const next = prev + 1;
+          if (next > highScore) {
+            setHighScore(next);
+            localStorage.setItem('dino_highscore', next.toString());
+          }
+          return next;
+        });
+      } else {
+        setScore(prev => prev + 1); // We still need the value up
+      }
+
+      // Handle Auto-Run Movement (Faster speed)
+      let nextDinoX = physicsRef.current.dinoX + 0.45 * delta;
+      if (nextDinoX > 110) nextDinoX = -10; // Wrap around to the left
+      physicsRef.current.dinoX = nextDinoX;
+      setDinoX(nextDinoX);
+
+      // Handle Jump Physics
+      let nextDinoY = physicsRef.current.dinoY + dinoVelocityY.current * delta;
+      dinoVelocityY.current -= 0.8 * delta; // Gravity
+
+      if (nextDinoY <= 0) {
+        nextDinoY = 0;
+        dinoVelocityY.current = 0;
+        setIsJumping(false);
+      }
+      physicsRef.current.dinoY = nextDinoY;
+      setDinoY(nextDinoY);
+
+      // Spawn obstacles
+      obstacleSpawnTimer.current += delta;
+      if (obstacleSpawnTimer.current > 90) {
+        obstacleSpawnTimer.current = 0;
+        const type = Math.random() > 0.4 ? 'cactus' : 'bird';
+        const height = type === 'cactus' ? 40 : 24;
+        const width = type === 'cactus' ? 24 : 36;
+        const y = type === 'cactus' ? 0 : (Math.random() > 0.5 ? 45 : 85); // High or low bird
+
+        physicsRef.current.obstacles.push({
+          id: obstacleIdCounter.current++,
+          x: 100, // percentage right side
+          type,
+          width,
+          height,
+          y,
+        });
+      }
+
+      // Move obstacles and check collisions
+      const remaining: Obstacle[] = [];
+      const containerWidth = containerRef.current?.clientWidth || 800;
+      
+      const dinoLeft = (physicsRef.current.dinoX / 100) * containerWidth;
+      const dinoRight = dinoLeft + 40;
+      const dinoBottom = physicsRef.current.dinoY;
+      const dinoTop = physicsRef.current.dinoY + 44;
+
+      for (const obs of physicsRef.current.obstacles) {
+        const nextX = obs.x - 0.35 * delta;
+
+        // Bounding Box Collision Check
+        const obsLeft = (nextX / 100) * containerWidth;
+        const obsRight = obsLeft + obs.width;
+        const obsBottom = obs.y;
+        const obsTop = obs.y + obs.height;
+
+        const isColliding =
+          dinoLeft < obsRight &&
+          dinoRight > obsLeft &&
+          dinoBottom < obsTop &&
+          dinoTop > obsBottom;
+
+        if (isColliding) {
+          setGameState('gameover');
+          return;
+        }
+
+        if (nextX > -10) {
+          remaining.push({ ...obs, x: nextX });
+        }
+      }
+      physicsRef.current.obstacles = remaining;
+      setObstacles(remaining);
+
+      // Hanging cards interaction check
+      if (physicsRef.current.dinoY > 80 && physicsRef.current.glowingCardId === null) {
+        HANGING_PLATFORMS.forEach(platform => {
+          const deltaX = Math.abs(physicsRef.current.dinoX - platform.logicalX);
+          if (deltaX < 8) {
+            const nearObstacle = physicsRef.current.obstacles.some(obs => Math.abs(obs.x - physicsRef.current.dinoX) < 18);
+
+            if (!nearObstacle) {
+              physicsRef.current.glowingCardId = platform.id;
+              setGlowingCardId(platform.id);
+              setTimeout(() => {
+                window.open(platform.url, '_blank');
+              }, 400);
+            }
+          }
+        });
+      }
+
+      requestRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    requestRef.current = requestAnimationFrame(gameLoop);
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [gameState]); // Removed physics dependencies so the loop never resets mid-game!
+
+  // Mobile Button Actions
+  const handleMobileClick = () => {
+    if (gameState === 'idle' || gameState === 'gameover') {
+      startGame();
+    } else {
+      triggerJump();
+    }
+  };
 
   return (
-    <div className={styles.scene}>
-      <BackgroundDecorations />
+    <div className={styles.scene} ref={containerRef}>
+      {/* Retro CRT overlay effects */}
+      <div className={styles.scanlines} />
 
-      {/* Section title */}
       <motion.h2
         className={styles.sectionTitle}
-        initial={{ opacity: 0, y: -20, filter: 'blur(6px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
       >
-        Connect With Me
+        Profiles & Retro Game
       </motion.h2>
 
-      {/* Hanging Platforms */}
+      {/* Hanging Platforms with Realistic Pendulum Swing */}
       <div className={styles.hangingArea}>
-        {PLATFORMS.map((platform, i) => (
-          <HangingCard
-            key={platform.id}
-            platform={platform}
-            index={i}
-            total={PLATFORMS.length}
-          />
-        ))}
+        {HANGING_PLATFORMS.map((platform, i) => {
+          const isGlowing = glowingCardId === platform.id;
+          
+          const randomHeight = (180 + (i * 35) % 80) * 2.15; // Heights reduced another 15%
+          const swingDuration = 3 + (i * 0.5); // 3s to 4.5s
+          const swingStart = -3 - (i % 3);
+          const swingEnd = 3 + (i % 3);
+
+          return (
+            <div
+              key={platform.id}
+              className={styles.ropeAnchor}
+              style={{ left: `${platform.logicalX}%` }}
+            >
+              <motion.div
+                initial={{ y: '-100%' }}
+                animate={{ y: dropped ? '0%' : '-100%' }}
+                transition={{ type: 'spring', damping: 12, stiffness: 60, delay: i * 0.15 + 0.3 }}
+                className={styles.ropeDrop}
+              >
+                <div
+                  className={`${styles.ropePendulum} ${styles[`swing${i % 4}`]}`}
+                  style={{
+                    '--swing-dur': `${swingDuration}s`,
+                    '--swing-del': `-${i * 0.5}s`
+                  } as React.CSSProperties}
+                >
+                  {/* Rope Structure: A single long segment */}
+                  <div className={styles.ropeLine} style={{ height: `${randomHeight}px` }}>
+                    {/* Social Icon Card */}
+                    <a
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${styles.iconCard} ${isGlowing ? styles.glowing : ''}`}
+                      onClick={(e) => {
+                        // Prevent default click if jumping and opening via logic
+                        if (isJumping) e.preventDefault();
+                      }}
+                    >
+                      <div className={styles.iconWrap}>
+                        {platform.icon}
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* CTA Button */}
-      <motion.div
-        className={styles.ctaArea}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      {/* Chrome Dino Style Retro Canvas - Appears after ropes drop */}
+      <motion.div 
+        className={styles.gameContainer}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: dropped ? 1 : 0 }}
+        transition={{ duration: 1, delay: 1.2 }}
       >
-        <motion.a
-          href={`mailto:${profileData.contact.email}`}
-          className={styles.ctaButton}
-          onMouseEnter={() => setHoveredCta(true)}
-          onMouseLeave={() => setHoveredCta(false)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
+        {/* Scoreboard */}
+        <div className={styles.scoreBoard}>
+          <span className={styles.highScore}>HI {String(highScore).padStart(5, '0')}</span>
+          <span>{String(score).padStart(5, '0')}</span>
+        </div>
+
+        {/* Dino */}
+        <div
+          className={`${styles.dino} ${gameState === 'playing' && !isJumping ? styles.running : ''} ${gameState === 'gameover' ? styles.dead : ''} ${isJumping ? styles.rainbowDino : ''}`}
+          style={{
+            left: `${dinoX}%`,
+            bottom: `${16 + dinoY}px`,
+          }}
         >
-          <motion.span
-            className={styles.ctaText}
-            animate={hoveredCta ? { x: [0, 4, 0] } : {}}
-            transition={{ duration: 0.4 }}
+          <div className={styles.dinoSprite} />
+        </div>
+
+        {/* Obstacles */}
+        {obstacles.map(obs => (
+          <div
+            key={obs.id}
+            className={obs.type === 'cactus' ? styles.cactus : styles.bird}
+            style={{
+              left: `${obs.x}%`,
+              bottom: `${16 + obs.y}px`,
+              width: `${obs.width}px`,
+              height: `${obs.height}px`,
+            }}
           >
-            Let&apos;s Work Together
-          </motion.span>
-          <motion.span
-            className={styles.ctaArrow}
-            animate={hoveredCta ? { x: [0, 6, 0], opacity: [1, 0.7, 1] } : {}}
-            transition={{ duration: 0.8, repeat: hoveredCta ? Infinity : 0 }}
-          >
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="M12 5l7 7-7 7" />
-            </svg>
-          </motion.span>
-        </motion.a>
+            {obs.type === 'cactus' ? (
+              <div className={styles.cactusSprite}>
+                <div className={styles.trunk} />
+                <div className={styles.branchLeft} />
+                <div className={styles.branchRight} />
+              </div>
+            ) : (
+              <div className={styles.birdSprite}>
+                <div className={styles.body} />
+                <div className={styles.beak} />
+                <div className={`${styles.wing} ${styles.wingUp}`} />
+                <div className={`${styles.wing} ${styles.wingDown}`} />
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Walking Path */}
+        <div className={`${styles.groundPath} ${gameState === 'playing' ? styles.scrolling : ''}`} />
+        <div className={`${styles.groundDetails} ${gameState === 'playing' ? styles.scrolling : ''}`} />
+
+        {/* Start / Game Over Overlays */}
+        {gameState === 'idle' && (
+          <div className={styles.overlay}>
+            <div className={styles.gameOverTitle} style={{ color: '#b2f548' }}>DINO RUNNER</div>
+            <div className={styles.instruction}>PRESS SPACE TO PLAY</div>
+            <div className={styles.instruction} style={{ opacity: 0.4 }}>Use Arrow Keys / A & D to run Left / Right & Space to Jump!</div>
+          </div>
+        )}
+
+        {gameState === 'gameover' && (
+          <div className={styles.overlay}>
+            <div className={styles.gameOverTitle}>GAME OVER</div>
+            <div className={styles.instruction}>PRESS SPACE TO RESTART</div>
+          </div>
+        )}
       </motion.div>
+
+      {/* Control Buttons for Mobile / Tablet */}
+      <div className={`${styles.controlsArea} ${styles.mobileOnly}`}>
+        <div className={styles.bottomInstruction}>
+          Press Space to jump! Jump to touch an icon.
+        </div>
+        <button className={styles.actionButton} onClick={handleMobileClick}>
+          {gameState === 'idle' && 'Play Now'}
+          {gameState === 'playing' && 'Jump'}
+          {gameState === 'gameover' && 'Play Again'}
+        </button>
+      </div>
     </div>
   );
 }

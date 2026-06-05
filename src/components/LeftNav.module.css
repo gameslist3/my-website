@@ -493,6 +493,17 @@
   display: none;
 }
 
+.hideOnDesktop {
+  display: none !important;
+}
+
+.forceShow {
+  display: flex !important;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4vh;
+}
+
 /* ── Mobile Responsiveness ─────────────────────────── */
 @media (max-width: 768px) {
   .progressTrack {

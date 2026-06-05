@@ -1,431 +1,493 @@
 /* ══════════════════════════════════════════════════
-   INTERACTIVE SOCIAL HUB — Full-Screen
+   INTERACTIVE SOCIAL HUB — Full-Screen with Dino Game
    ══════════════════════════════════════════════════ */
 
 .scene {
   position: relative;
   width: 100%;
   height: 100vh;
-  min-height: 600px;
+  min-height: 650px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   overflow: hidden;
   user-select: none;
   background: #080808;
+  padding: 40px 20px 20px;
 }
 
-/* ══════════════════════════════════════════════════
-   BACKGROUND DECORATIONS
-   ══════════════════════════════════════════════════ */
-
-.bgDecorations {
+.scene::after {
+  content: '';
   position: absolute;
   inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
   pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
+  z-index: 100;
 }
 
-.bgOrbitRing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 70vmin;
-  height: 70vmin;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid rgba(178, 245, 72, 0.05);
-  box-shadow:
-    0 0 40px rgba(178, 245, 72, 0.02),
-    inset 0 0 40px rgba(178, 245, 72, 0.02);
-}
-
-.bgOrbitRing::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(178, 245, 72, 0.25);
-  box-shadow: 0 0 10px rgba(178, 245, 72, 0.2);
-  transform: translateX(-50%);
-}
-
-.bgOrbitRingInner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50vmin;
-  height: 50vmin;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid rgba(178, 245, 72, 0.03);
-}
-
-.bgOrbitRingInner::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  right: 50%;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(178, 245, 72, 0.15);
-  transform: translateX(50%);
-}
-
-.bgGlowOrb {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50vmax;
-  height: 50vmax;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at center,
-    rgba(178, 245, 72, 0.06) 0%,
-    rgba(178, 245, 72, 0.02) 40%,
-    transparent 70%
-  );
-}
-
-.bgGrid {
+.scanlines {
   position: absolute;
   inset: 0;
-  opacity: 0.025;
-  background-image:
-    linear-gradient(rgba(178, 245, 72, 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(178, 245, 72, 0.5) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.15) 50%,
+    rgba(0,0,0,0.15)
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 99;
 }
+
+/* Background decorations removed per user request */
 
 /* ══════════════════════════════════════════════════
    SECTION TITLE
    ══════════════════════════════════════════════════ */
 
 .sectionTitle {
-  position: absolute;
-  top: clamp(24px, 4vh, 48px);
-  left: 50%;
-  transform: translateX(-50%);
   font-family: 'Inconsolata', monospace;
   font-size: clamp(14px, 1.2vw, 18px);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.2);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   z-index: 2;
   white-space: nowrap;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 /* ══════════════════════════════════════════════════
-   HANGING AREA
+   ROPE SWING & HANGING CARDS (Physics Swing)
    ══════════════════════════════════════════════════ */
 
 .hangingArea {
-  position: relative;
+  position: absolute;
+  top: -40px;
+  left: 0;
+  right: 0;
   z-index: 2;
-  width: 80%;
+  width: 100%;
   max-width: 900px;
-  height: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 5vh;
+  height: 220px;
+  margin: 0 auto;
+  pointer-events: none; /* Let clicks pass through except on icons */
 }
 
-.hangingGroup {
+.ropeAnchor {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
+}
+
+.ropeDrop {
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: gentleSwing 5s ease-in-out infinite;
-  animation-delay: var(--swing-delay, 0s);
 }
 
-@keyframes gentleSwing {
-  0%, 100% {
-    transform: translateX(-50%) rotate(2deg);
-  }
-  50% {
-    transform: translateX(-50%) rotate(-2deg);
-  }
+.ropePendulum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
 }
 
-/* ── Hanging Line ──────────────────────────── */
+@keyframes swing0 { 0% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
+@keyframes swing1 { 0% { transform: rotate(-4deg); } 100% { transform: rotate(2deg); } }
+@keyframes swing2 { 0% { transform: rotate(-2deg); } 100% { transform: rotate(4deg); } }
+@keyframes swing3 { 0% { transform: rotate(-5deg); } 100% { transform: rotate(5deg); } }
 
-.hangingLine {
-  width: 1.5px;
-  flex: 1;
-  min-height: 80px;
-  max-height: 180px;
-  background: linear-gradient(
-    to bottom,
-    rgba(178, 245, 72, 0.08) 0%,
-    rgba(178, 245, 72, 0.3) 50%,
-    rgba(178, 245, 72, 0.15) 100%
-  );
+.swing0 { animation: swing0 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
+.swing1 { animation: swing1 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
+.swing2 { animation: swing2 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
+.swing3 { animation: swing3 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
+
+.ropeLine {
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(178, 245, 72, 0.2), #b2f548);
   position: relative;
-}
-
-.lineGlow {
-  position: absolute;
-  inset: -4px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(178, 245, 72, 0.4) 40%,
-    rgba(178, 245, 72, 0.6) 50%,
-    rgba(178, 245, 72, 0.4) 60%,
-    transparent 100%
-  );
-  filter: blur(6px);
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /* ── Icon Card ─────────────────────────────── */
 
 .iconCard {
-  position: relative;
-  width: 88px;
-  height: 88px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   transition:
-    background 0.4s ease,
-    border-color 0.4s ease,
-    box-shadow 0.4s ease,
-    color 0.4s ease;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    0 1px 4px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+  overflow: visible;
+  margin-top: 0;
+  pointer-events: auto; /* Re-enable clicks since parent has pointer-events: none */
 }
 
-.iconCard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  background: radial-gradient(
-    circle at 30% 20%,
-    rgba(255, 255, 255, 0.06) 0%,
-    transparent 60%
-  );
-  pointer-events: none;
-}
-
-.iconCard:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(178, 245, 72, 0.3);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(178, 245, 72, 0.12);
+/* Glowing class for target activation */
+.iconCard.glowing, .iconCard:hover {
+  border-color: #b2f548;
   color: #b2f548;
+  box-shadow:
+    0 0 25px rgba(178, 245, 72, 0.4),
+    inset 0 0 10px rgba(178, 245, 72, 0.2);
 }
 
 .iconWrap {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .iconWrap svg {
-  width: 32px;
-  height: 32px;
-}
-
-.cardGlowRing {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 2px solid rgba(178, 245, 72, 0.2);
-  box-shadow: 0 0 20px rgba(178, 245, 72, 0.1);
-  pointer-events: none;
-}
-
-/* ── Platform Label ────────────────────────── */
-
-.platformLabel {
-  font-family: 'Inconsolata', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.25);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-top: 12px;
-  white-space: nowrap;
+  width: 48px;
+  height: 48px;
 }
 
 /* ══════════════════════════════════════════════════
-   CTA BUTTON
+   DINO GAME AREA
    ══════════════════════════════════════════════════ */
 
-.ctaArea {
+.gameContainer {
   position: absolute;
-  bottom: clamp(80px, 10vh, 110px);
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 20vh;
+  left: 0;
+  width: 100%;
+  height: 280px;
+  z-index: 2;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Score Board */
+.scoreBoard {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  color: #b2f548;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  display: flex;
+  gap: 15px;
   z-index: 10;
 }
 
-.ctaButton {
-  display: inline-flex;
+.highScore {
+  opacity: 0.5;
+}
+
+/* Ground Walking Path */
+.groundPath {
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 200%;
+  height: 60px;
+  background: url('https://assets.codepen.io/1480814/gg_1.png') left 0 bottom 8px repeat-x;
+  z-index: 3;
+}
+
+.groundPath.scrolling {
+  animation: scrollGround 1.2s linear infinite;
+}
+
+@keyframes scrollGround {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Ground details (noise dots) handled by sprite */
+.groundDetails {
+  display: none;
+}
+
+/* ── PIXEL DINO (Pure CSS Retro Sprite) ──────── */
+
+/* ── PIXEL DINO (Pure CSS Retro Sprite) ──────── */
+
+.dino {
+  position: absolute;
+  bottom: 16px; /* rests on ground path */
+  z-index: 5;
+  /* Removed transition: left to prevent wrap-around flying bug */
+}
+
+.dinoSprite {
+  width: 44px;
+  height: 50px;
+  background: url('https://assets.codepen.io/1480814/dd.png') 0px 0px no-repeat;
+  display: block;
+}
+
+.running .dinoSprite {
+  animation: dinoRunSteps 0.3s steps(2, jump-none) infinite;
+}
+
+@keyframes dinoRunSteps {
+  0% { background-position: -88px 0; }
+  100% { background-position: -132px 0; }
+}
+
+/* Rainbow animation on jump */
+.rainbowDino .dinoSprite {
+  animation: rainbowCycle 0.5s linear infinite;
+}
+
+@keyframes rainbowCycle {
+  0% { filter: sepia(1) saturate(5) hue-rotate(0deg); }
+  100% { filter: sepia(1) saturate(5) hue-rotate(360deg); }
+}
+
+/* Dead State */
+.dead .dinoSprite {
+  background-position: -176px 0;
+}
+
+/* ── OBSTACLES ──────────────────────────────── */
+
+/* Cactus Sprite */
+.cactus {
+  position: absolute;
+  bottom: 34px;
+  width: 24px;
+  height: 40px;
+  z-index: 4;
+}
+
+.cactusSprite {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cactusSprite .trunk {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  width: 6px;
+  height: 100%;
+  background: #888;
+}
+
+.cactusSprite .branchLeft {
+  position: absolute;
+  top: 10px;
+  left: 2px;
+  width: 10px;
+  height: 16px;
+  border-left: 4px solid #888;
+  border-bottom: 4px solid #888;
+}
+
+.cactusSprite .branchRight {
+  position: absolute;
+  top: 6px;
+  right: 2px;
+  width: 10px;
+  height: 16px;
+  border-right: 4px solid #888;
+  border-bottom: 4px solid #888;
+}
+
+/* Bird Sprite */
+.bird {
+  position: absolute;
+  width: 36px;
+  height: 24px;
+  z-index: 4;
+}
+
+.birdSprite {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.birdSprite .body {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  width: 24px;
+  height: 10px;
+  background: #aaa;
+}
+
+.birdSprite .beak {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  width: 8px;
+  height: 6px;
+  background: #e0e0e0;
+}
+
+.birdSprite .wing {
+  position: absolute;
+  left: 12px;
+  width: 8px;
+  height: 12px;
+  background: #888;
+  transform-origin: center;
+}
+
+.birdSprite .wingUp {
+  top: -8px;
+  animation: flapUp 0.15s steps(2) infinite alternate;
+}
+
+.birdSprite .wingDown {
+  bottom: -8px;
+  animation: flapDown 0.15s steps(2) infinite alternate;
+}
+
+@keyframes flapUp {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(-0.8); top: -2px; }
+}
+
+@keyframes flapDown {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(-0.8); bottom: -2px; }
+}
+
+/* ── GAME OVER & INSTRUCTIONS OVERLAYS ──────── */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 16px 36px;
-  border-radius: 100px;
-  background: linear-gradient(
-    135deg,
-    rgba(178, 245, 72, 0.15) 0%,
-    rgba(178, 245, 72, 0.08) 100%
-  );
-  border: 1px solid rgba(178, 245, 72, 0.25);
+  justify-content: center;
+  
+  color: #fff;
+  z-index: 10;
+  text-align: center;
+}
+
+.gameOverTitle {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 32px;
+  font-weight: bold;
+  color: #b2f548;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px #b2f548;
+}
+
+.instruction {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  color: #b2f548;
+  opacity: 0.8;
+  margin-top: 15px;
+  text-shadow: 0 0 5px #b2f548;
+}
+
+.bottomInstruction {
+  font-family: 'Inconsolata', monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  z-index: 10;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/* Mobile & Tablet Control Buttons */
+.controlsArea {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  z-index: 10;
+}
+
+.mobileOnly {
+  display: none;
+}
+
+.actionButton {
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: 2px solid #b2f548;
+  background: transparent;
   color: #b2f548;
   font-family: 'Inconsolata', monospace;
-  font-size: clamp(14px, 1.1vw, 16px);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
   cursor: pointer;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(178, 245, 72, 0.08);
-  transition:
-    background 0.4s ease,
-    border-color 0.4s ease,
-    box-shadow 0.4s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 15px rgba(178, 245, 72, 0.15);
 }
 
-.ctaButton:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(178, 245, 72, 0.25) 0%,
-    rgba(178, 245, 72, 0.12) 100%
-  );
-  border-color: rgba(178, 245, 72, 0.5);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.4),
-    0 0 50px rgba(178, 245, 72, 0.2);
+.actionButton:hover {
+  background: #b2f548;
+  color: #000;
+  box-shadow: 0 0 25px rgba(178, 245, 72, 0.4);
 }
 
-.ctaText {
-  position: relative;
-  z-index: 1;
-}
-
-.ctaArrow {
-  display: flex;
-  align-items: center;
-  position: relative;
-  z-index: 1;
+.actionButton:active {
+  transform: scale(0.95);
 }
 
 /* ══════════════════════════════════════════════════
-   RESPONSIVE — Tablet
+   RESPONSIVE DESIGN
    ══════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
   .hangingArea {
-    width: 90%;
-    height: 55%;
-    padding-top: 8vh;
+    top: 0;
   }
-
-  .hangingLine {
-    min-height: 60px;
-    max-height: 120px;
-  }
-
   .iconCard {
-    width: 76px;
-    height: 76px;
-    border-radius: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
   }
-
   .iconWrap svg {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
-
-  .platformLabel {
-    font-size: 11px;
-    margin-top: 10px;
-  }
-
-  .sectionTitle {
-    font-size: 12px;
-    top: clamp(16px, 3vh, 32px);
-  }
-
-  .ctaButton {
-    padding: 14px 28px;
-    font-size: 14px;
+  .mobileOnly {
+    display: flex;
   }
 }
 
-/* ══════════════════════════════════════════════════
-   RESPONSIVE — Mobile
-   ══════════════════════════════════════════════════ */
-
 @media (max-width: 600px) {
-  .hangingArea {
-    width: 95%;
-    height: 50%;
-    padding-top: 10vh;
-  }
-
-  .hangingLine {
-    min-height: 40px;
-    max-height: 80px;
-  }
-
   .iconCard {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
   }
-
   .iconWrap svg {
     width: 24px;
     height: 24px;
   }
-
-  .platformLabel {
-    font-size: 10px;
-    margin-top: 8px;
-  }
-
-  .ctaButton {
-    padding: 12px 24px;
-    font-size: 13px;
-    gap: 8px;
-  }
-
-  .ctaArrow svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .sectionTitle {
-    display: none;
+  .mobileOnly {
+    display: flex;
   }
 }

@@ -262,9 +262,9 @@ ${profileData.longTermGoals}
       {/* Ambient neon-green glow in corners */}
       <div className={styles.ambientGlow} />
 
-      {/* ── Stacked Cards ── */}
+      {/* ── Stacked Cards (Hidden on Profiles section to save space) ── */}
       <div
-        className={styles.stack}
+        className={`${styles.stack} ${activeSection === 4 ? styles.hideOnDesktop : ''}`}
         onMouseEnter={() => setStackHovered(true)}
         onMouseLeave={() => { setStackHovered(false); setHoveredCard(null); }}
       >
@@ -360,8 +360,8 @@ ${profileData.longTermGoals}
         )}
       </AnimatePresence>
 
-      {/* ── Mobile Stack (visible only on mobile) ── */}
-      <div className={styles.mobileStack}>
+      {/* ── Mobile Stack (Visible on mobile OR on Profiles section desktop) ── */}
+      <div className={`${styles.mobileStack} ${activeSection === 4 ? styles.forceShow : ''}`}>
         <div className={styles.mobileBtn} onClick={handleAskClick}>
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
