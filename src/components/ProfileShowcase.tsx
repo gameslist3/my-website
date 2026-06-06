@@ -287,7 +287,7 @@ export default function ProfileShowcase() {
       setObstacles(remaining);
 
       // Hanging cards interaction check
-      if (physicsRef.current.dinoY > 80 && physicsRef.current.glowingCardId === null) {
+      if (physicsRef.current.dinoY > 60 && physicsRef.current.glowingCardId === null) {
         HANGING_PLATFORMS.forEach(platform => {
           const deltaX = Math.abs(physicsRef.current.dinoX - platform.logicalX);
           if (deltaX < 8) {
@@ -341,7 +341,8 @@ export default function ProfileShowcase() {
         {HANGING_PLATFORMS.map((platform, i) => {
           const isGlowing = glowingCardId === platform.id;
           
-          const randomHeight = (180 + (i * 35) % 80) * 2.15; // Heights reduced another 15%
+          const randomOffset = (i * 35) % 80;
+          const randomHeight = `calc(80vh - 135px - ${randomOffset}px)`; // Dynamic height targeting dino head jump height
           const swingDuration = 3 + (i * 0.5); // 3s to 4.5s
           const swingStart = -3 - (i % 3);
           const swingEnd = 3 + (i % 3);
@@ -366,7 +367,7 @@ export default function ProfileShowcase() {
                   } as React.CSSProperties}
                 >
                   {/* Rope Structure: A single long segment */}
-                  <div className={styles.ropeLine} style={{ height: `${randomHeight}px` }}>
+                  <div className={styles.ropeLine} style={{ height: randomHeight }}>
                     {/* Social Icon Card */}
                     <a
                       href={platform.url}
