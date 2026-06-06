@@ -495,7 +495,7 @@ export default function ProfileShowcase() {
             <div style={{ 
               fontSize: '48px', 
               color: '#b2f548', 
-              fontFamily: "'Courier New', Courier, monospace", 
+              fontFamily: "'Pixelify Sans', 'Courier New', Courier, monospace", 
               fontWeight: 'bold',
               letterSpacing: '2px',
               textShadow: '0 0 10px #b2f548',
@@ -507,7 +507,7 @@ export default function ProfileShowcase() {
               fontSize: '20px',
               color: '#b2f548',
               opacity: 0.5,
-              fontFamily: "'Courier New', Courier, monospace",
+              fontFamily: "'Pixelify Sans', 'Courier New', Courier, monospace",
               marginBottom: '5px'
             }}>
               HI {String(highScore).padStart(5, '0')}

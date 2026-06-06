@@ -195,7 +195,7 @@
   z-index: 10;
   white-space: nowrap;
 
-  font-family: 'VT323', 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', 'VT323', 'Courier New', Courier, monospace;
   text-align: center;
   animation: example 1s infinite;
 }
