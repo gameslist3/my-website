@@ -22,6 +22,7 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [card1Closing, setCard1Closing] = useState(false);
   const [searchOrigin, setSearchOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [mobileSocialOpen, setMobileSocialOpen] = useState(false);
   const [resumeOrigin, setResumeOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,6 +54,14 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [searchOpen]);
+
+  // ── Click away for mobile social ──
+  useEffect(() => {
+    if (!mobileSocialOpen) return;
+    const handleDocClick = () => setMobileSocialOpen(false);
+    window.addEventListener('click', handleDocClick);
+    return () => window.removeEventListener('click', handleDocClick);
+  }, [mobileSocialOpen]);
 
   // ── Social card hold interaction ──
   useEffect(() => {
@@ -335,7 +344,7 @@ ${profileData.longTermGoals}
               </div>
               <div ref={optionBRef} className={`${styles.option} ${styles.optionB} ${activeOption === 'b' ? styles.active : ''}`}>
                 <div className={styles.socialItem}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.722-.902 1.143-1.642.982-.721-.16-1.142-.902-.981-1.643.18-.722.902-1.143 1.642-.981.74.16 1.142.902.981 1.643zm-1.383 5.673c-1.242 1.322-3.156 1.984-5.51 1.984-1.463 0-2.484-.28-3.807-.882l-2.103.722.722-1.964c-1.102-.882-1.723-2.123-1.723-3.566 0-2.203 1.242-5.55 6.91-5.55 2.445 0 4.288.641 5.35 1.442l1.923-.56-.64 1.984c.561.882.882 2.042.882 3.526 0 1.601-.52 2.903-2.004 3.908zm-4.849-2.884c0 .56-.24 1.082-.641 1.442-.48.4-1.082.56-1.764.56-1.042 0-1.643-.48-1.643-1.562 0-1.082.64-2.324 1.603-2.324.48 0 .961.16 1.322.48.4.321.64.802.64 1.322.16.08.483.08.483.08zm3.446 0c0-.56-.24-1.082-.64-1.442-.481-.4-1.082-.56-1.764-.56-1.042 0-1.643.48-1.643 1.562 0 1.082.64 2.324 1.603 2.324.481 0 .961-.16 1.322-.48.4-.321.64-.802.64-1.322.16-.08.482-.08.482-.08z"/></svg>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.665 1.45.665 2.36 0 .75-.13 1.39-.41 1.93-.28.55-.67 1-1.16 1.35-.48.348-1.05.6-1.67.767-.61.165-1.252.254-1.91.254H0V4.51h6.938v-.007zM16.94 16.665c.44.428 1.073.643 1.894.643.59 0 1.1-.148 1.53-.447.424-.29.68-.61.78-.94h2.588c-.403 1.28-1.048 2.2-1.9 2.75-.85.56-1.884.83-3.08.83-.837 0-1.584-.13-2.272-.4-.673-.27-1.24-.65-1.72-1.14-.464-.49-.823-1.08-1.077-1.77-.253-.69-.373-1.45-.373-2.27 0-.803.135-1.54.403-2.23.27-.7.644-1.28 1.12-1.79.495-.51 1.063-.895 1.736-1.194s1.4-.433 2.22-.433c.91 0 1.69.164 2.38.523.67.34 1.22.82 1.66 1.4.44.586.75 1.26.94 2.02.19.75.25 1.54.21 2.38h-7.69c0 .84.28 1.632.71 2.065l-.08.03zm-10.24.05c.317 0 .62-.03.906-.093.29-.06.548-.165.763-.3.21-.135.39-.328.52-.583.13-.24.19-.57.19-.96 0-.75-.22-1.29-.64-1.62-.43-.32-.99-.48-1.69-.48H3.24v4.05H6.7v-.03zm13.607-5.65c-.352-.385-.94-.592-1.657-.592-.468 0-.855.074-1.166.238-.302.15-.55.35-.74.59-.19.24-.317.48-.392.75-.075.26-.12.5-.135.71h4.762c-.07-.75-.33-1.3-.68-1.69v.01zM6.52 10.45c.574 0 1.05-.134 1.425-.412.374-.27.554-.72.554-1.338 0-.344-.07-.625-.18-.846-.13-.22-.3-.39-.5-.512-.21-.124-.45-.21-.72-.257-.27-.053-.56-.074-.84-.074H3.23v3.44h3.29zm9.098-4.958h5.968v1.454h-5.968V5.48v.01z"/></svg>
                 </div>
               </div>
               <div ref={optionCRef} className={`${styles.option} ${styles.optionC} ${activeOption === 'c' ? styles.active : ''}`}>
@@ -375,15 +384,50 @@ ${profileData.longTermGoals}
           </svg>
           <span className={styles.mobileBtnText}>CV</span>
         </div>
-        <div className={styles.mobileBtn} onClick={() => setActiveSection(5)}>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-          </svg>
-        </div>
+        <motion.div 
+          className={styles.mobileBtn} 
+          onClick={(e) => {
+            e.stopPropagation();
+            setMobileSocialOpen(!mobileSocialOpen);
+          }}
+          animate={{ height: mobileSocialOpen ? 220 : 64 }}
+          transition={{ duration: 0.3 }}
+          style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: mobileSocialOpen ? 'flex-start' : 'center', paddingTop: mobileSocialOpen ? '20px' : '0' }}
+        >
+          {!mobileSocialOpen && (
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          )}
+
+          <AnimatePresence>
+            {mobileSocialOpen && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={styles.mobileSocialList}
+              >
+                <div className={styles.mobileSocialItem} onClick={(e) => { e.stopPropagation(); window.open('https://www.linkedin.com/in/shubham-roy-4a186920a/', '_blank'); }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </div>
+                <div className={styles.mobileSocialItem} onClick={(e) => { e.stopPropagation(); window.open('https://www.behance.net/shubhamroy4', '_blank'); }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.665 1.45.665 2.36 0 .75-.13 1.39-.41 1.93-.28.55-.67 1-1.16 1.35-.48.348-1.05.6-1.67.767-.61.165-1.252.254-1.91.254H0V4.51h6.938v-.007zM16.94 16.665c.44.428 1.073.643 1.894.643.59 0 1.1-.148 1.53-.447.424-.29.68-.61.78-.94h2.588c-.403 1.28-1.048 2.2-1.9 2.75-.85.56-1.884.83-3.08.83-.837 0-1.584-.13-2.272-.4-.673-.27-1.24-.65-1.72-1.14-.464-.49-.823-1.08-1.077-1.77-.253-.69-.373-1.45-.373-2.27 0-.803.135-1.54.403-2.23.27-.7.644-1.28 1.12-1.79.495-.51 1.063-.895 1.736-1.194s1.4-.433 2.22-.433c.91 0 1.69.164 2.38.523.67.34 1.22.82 1.66 1.4.44.586.75 1.26.94 2.02.19.75.25 1.54.21 2.38h-7.69c0 .84.28 1.632.71 2.065l-.08.03zm-10.24.05c.317 0 .62-.03.906-.093.29-.06.548-.165.763-.3.21-.135.39-.328.52-.583.13-.24.19-.57.19-.96 0-.75-.22-1.29-.64-1.62-.43-.32-.99-.48-1.69-.48H3.24v4.05H6.7v-.03zm13.607-5.65c-.352-.385-.94-.592-1.657-.592-.468 0-.855.074-1.166.238-.302.15-.55.35-.74.59-.19.24-.317.48-.392.75-.075.26-.12.5-.135.71h4.762c-.07-.75-.33-1.3-.68-1.69v.01zM6.52 10.45c.574 0 1.05-.134 1.425-.412.374-.27.554-.72.554-1.338 0-.344-.07-.625-.18-.846-.13-.22-.3-.39-.5-.512-.21-.124-.45-.21-.72-.257-.27-.053-.56-.074-.84-.074H3.23v3.44h3.29zm9.098-4.958h5.968v1.454h-5.968V5.48v.01z"/></svg>
+                </div>
+                <div className={styles.mobileSocialItem} onClick={(e) => { e.stopPropagation(); window.open('https://github.com/gameslist3', '_blank'); }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                </div>
+                <div className={styles.mobileSocialItem} onClick={(e) => { e.stopPropagation(); window.open('mailto:portfolioshubham787@gmail.com', '_self'); }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.691 2.28 24 3.434 24 5.457z"/></svg>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* ── Search Modal (morph overlay) ── */}

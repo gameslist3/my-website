@@ -36,15 +36,6 @@ function getLogoForCompany(company: string): string {
   return key ? COMPANY_LOGOS[key] : '';
 }
 
-/* ══════════════════════════════════════════════════
-   SPRING — 1-D spring physics step
-   ══════════════════════════════════════════════════ */
-
-function springStep(s: { pos: number; vel: number }, target: number, k = 0.045, d = 0.78) {
-  s.vel += (target - s.pos) * k;
-  s.vel *= d;
-  s.pos += s.vel;
-}
 
 /* ══════════════════════════════════════════════════
    YEAR COUNTDOWN — Direct DOM updates

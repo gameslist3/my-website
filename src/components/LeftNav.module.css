@@ -549,6 +549,35 @@
     letter-spacing: 0.05em;
   }
   
+  .mobileSocialList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    align-items: center;
+  }
+  
+  .mobileSocialItem {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .mobileSocialItem:active {
+    color: #B2F548;
+    background: rgba(178, 245, 72, 0.1);
+  }
+  
+  .mobileSocialItem svg, .mobileSocialItem img {
+    width: 20px;
+    height: 20px;
+  }
+  
   .leftNav {
     left: 16px;
     transform: none;

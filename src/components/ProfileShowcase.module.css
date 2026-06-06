@@ -184,24 +184,39 @@
 /* Score Board */
 .scoreBoard {
   position: absolute;
-  top: 15px;
+  top: 25%;
   left: 50%;
-  transform: translateX(-50%);
-  color: #b2f548;
-  font-size: 24px;
-  font-weight: bold;
-  letter-spacing: 2px;
+  transform: translate(-50%, -50%);
+  font-size: clamp(50px, 12vw, 120px);
+  font-weight: 900;
+  letter-spacing: 4px;
   display: flex;
-  gap: 20px;
+  gap: 30px;
   z-index: 10;
+  white-space: nowrap;
+
+  /* Animated Rainbow Gradient */
+  background: linear-gradient(to right, #ff3b3b, #ff9d00, #ffee00, #33ff33, #00d4ff, #c300ff, #ff3b3b);
+  background-size: 200% auto;
+  color: #b2f548; /* fallback */
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowText 3s linear infinite;
+  filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+}
+
+@keyframes rainbowText {
+  0% { background-position: 0% center; }
+  100% { background-position: -200% center; }
 }
 
 .blinkScore {
-  animation: blinkScore 1s cubic-bezier(1, 0, 0, 1) infinite;
-  text-shadow: 0 0 10px #b2f548;
+  animation: blinkScore 0.8s step-end infinite, rainbowText 3s linear infinite;
 }
 
 @keyframes blinkScore {
+  0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
@@ -426,7 +441,6 @@
   text-align: center;
 }
 
-/* Mobile & Tablet Control Buttons */
 .controlsArea {
   position: absolute;
   bottom: 90px;
@@ -438,6 +452,7 @@
   justify-content: center;
   align-items: center;
   z-index: 999;
+  pointer-events: auto;
 }
 
 .mobileOnly {
