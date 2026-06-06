@@ -114,6 +114,9 @@ export default function ProfileShowcase() {
   // Visual glows on hanging cards
   const [glowingCardId, setGlowingCardId] = useState<string | null>(null);
 
+  // Glitch effect state
+  const [glitching, setGlitching] = useState(false);
+
   // Refs for tracking DOM and game loop
   const containerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | null>(null);
@@ -125,6 +128,28 @@ export default function ProfileShowcase() {
     const timer = setTimeout(() => setDropped(true), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  // Random glitch effect during gameplay
+  useEffect(() => {
+    if (gameState !== 'playing') {
+      setGlitching(false);
+      return;
+    }
+
+    const scheduleGlitch = () => {
+      const nextDelay = 3000 + Math.random() * 7000; // 3-10 seconds
+      return setTimeout(() => {
+        setGlitching(true);
+        setTimeout(() => {
+          setGlitching(false);
+          scheduleGlitchTimer = scheduleGlitch();
+        }, 200 + Math.random() * 300); // glitch lasts 200-500ms
+      }, nextDelay);
+    };
+
+    let scheduleGlitchTimer = scheduleGlitch();
+    return () => clearTimeout(scheduleGlitchTimer);
+  }, [gameState]);
 
   // Jump function
   const triggerJump = () => {
@@ -288,7 +313,8 @@ export default function ProfileShowcase() {
       if (physicsRef.current.dinoY > 50 && physicsRef.current.glowingCardId === null) {
         HANGING_PLATFORMS.forEach(platform => {
           const deltaX = Math.abs(physicsRef.current.dinoX - platform.logicalX);
-          if (deltaX < 10) {
+          // Very tight horizontal hit detection so it only hits when directly under the card
+          if (deltaX < 3.5) {
             // Do not trigger card if jumping over an obstacle
             const nearObstacle = physicsRef.current.obstacles.some(obs => Math.abs(obs.x - physicsRef.current.dinoX) < 15);
             
@@ -407,7 +433,6 @@ export default function ProfileShowcase() {
         {/* Scoreboard - hidden during gameover since score shows in overlay */}
         {gameState !== 'idle' && gameState !== 'gameover' && (
           <div className={styles.scoreBoard}>
-            <span className={styles.highScore}>HI {String(highScore).padStart(5, '0')}</span>
             <span>{String(score).padStart(5, '0')}</span>
           </div>
         )}
