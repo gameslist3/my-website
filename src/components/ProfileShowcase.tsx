@@ -399,10 +399,12 @@ export default function ProfileShowcase() {
         transition={{ duration: 1, delay: 1.2 }}
       >
         {/* Scoreboard */}
-        <div className={styles.scoreBoard}>
-          <span className={styles.highScore}>HI {String(highScore).padStart(5, '0')}</span>
-          <span>{String(score).padStart(5, '0')}</span>
-        </div>
+        {gameState !== 'idle' && (
+          <div className={`${styles.scoreBoard} ${gameState === 'gameover' ? styles.blinkScore : ''}`}>
+            <span className={styles.highScore}>HI {String(highScore).padStart(5, '0')}</span>
+            <span>{String(score).padStart(5, '0')}</span>
+          </div>
+        )}
 
         {/* Dino */}
         <div
@@ -470,7 +472,11 @@ export default function ProfileShowcase() {
         <div className={styles.bottomInstruction}>
           Press Space to jump! Jump to touch an icon.
         </div>
-        <button className={styles.actionButton} onClick={handleMobileClick}>
+        <button 
+          className={styles.actionButton} 
+          onClick={handleMobileClick}
+          onTouchEnd={(e) => { e.preventDefault(); handleMobileClick(); }}
+        >
           {gameState === 'idle' && 'Play Now'}
           {gameState === 'playing' && 'Jump'}
           {gameState === 'gameover' && 'Play Again'}
