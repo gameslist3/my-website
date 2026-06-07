@@ -310,6 +310,8 @@
 
 .highScore {
   /* Removed opacity to ensure it renders with the background-clip properly */
+  /* provide a harmless rule to avoid empty ruleset warning */
+  display: inline-block;
 }
 
 /* Ground Walking Path */

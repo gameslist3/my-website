@@ -23,11 +23,6 @@ const profiles = [
   { num: '03', name: 'LinkedIn', role: 'Professional Network & Writing', year: 'linkedin.com' }
 ];
 
-const contacts = [
-  { num: '01', name: 'Email Me', role: 'hello@antigravity.design', year: 'Instant' },
-  { num: '02', name: 'Book a Call', role: 'calendly.com/antigravity', year: '30 Mins' },
-  { num: '03', name: 'Location', role: 'San Francisco, CA', year: 'PST' }
-];
 
 export default function RightIdentity({ activeSection }: RightIdentityProps) {
   const experienceDuration = getExperienceDuration(profileData.experienceStart);
@@ -165,33 +160,6 @@ impact.`;
           </motion.div>
         )}
 
-        {activeSection === 5 && (
-          <motion.div
-            key="contact"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className={styles.projectsContainer}
-          >
-            {contacts.map((contact, i) => (
-              <motion.div
-                key={contact.num}
-                variants={itemVariants(i)}
-                initial="hidden"
-                animate="visible"
-                className={styles.projectItem}
-              >
-                <div className={styles.projHeader}>
-                  <span className={styles.projNum}>{contact.num}</span>
-                  <span className={styles.projYear}>{contact.year}</span>
-                </div>
-                <div className={styles.projTitle}>{contact.name}</div>
-                <div className={styles.projRole}>{contact.role}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
       </AnimatePresence>
     </div>
   );
