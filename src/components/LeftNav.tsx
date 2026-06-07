@@ -266,6 +266,8 @@ ${profileData.longTermGoals}
     }
   };
 
+  if (activeSection === 5) return null;
+
   return (
     <div className={styles.leftNav}>
       {/* Ambient neon-green glow in corners */}

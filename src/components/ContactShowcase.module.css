@@ -1,0 +1,231 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  perspective: 1000px;
+  pointer-events: none;
+}
+
+/* Background video that fades in on click */
+.bgVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+}
+
+.bgVideoPlaying {
+  opacity: 1;
+}
+
+/* Top Ask Bar */
+.askBarContainer {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 50;
+}
+
+.askBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.askBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #b2f548;
+}
+
+.askIcon {
+  color: #b2f548;
+  display: flex;
+  align-items: center;
+}
+
+/* Cover Flow Slider */
+.sliderWrapper {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.sliderTrack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.iconCard {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  user-select: none;
+}
+
+.iconCard:active {
+  cursor: grabbing;
+}
+
+.iconImage {
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  transition: filter 0.3s ease;
+}
+
+/* Glow Effect */
+.glowing {
+  border-color: #b2f548;
+  box-shadow: 0 0 30px #b2f548, inset 0 0 20px rgba(178, 245, 72, 0.5);
+  background: rgba(178, 245, 72, 0.1);
+  z-index: 100 !important;
+}
+
+.glowing .iconImage {
+  filter: drop-shadow(0 0 15px #b2f548) brightness(1.5) sepia(1) hue-rotate(45deg) saturate(5);
+}
+
+/* Dust Particles Container */
+.dustContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 101;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #b2f548;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #b2f548;
+  opacity: 0;
+}
+
+/* Modal Search Overlay (Copied from LeftNav for consistency) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.searchBox {
+  position: absolute;
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.searchInputWrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.searchIcon {
+  color: #b2f548;
+  margin-right: 16px;
+  animation: pulse 2s infinite;
+}
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.answerArea {
+  margin-top: 20px;
+  color: #ccc;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.answerContent {
+  color: white;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 20px;
+  text-align: center;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}

@@ -12,6 +12,7 @@ import SoundManager from '@/components/SoundManager';
 import WorkShowcase from '@/components/WorkShowcase';
 import ExperienceShowcase from '@/components/ExperienceShowcase';
 import ProfileShowcase from '@/components/ProfileShowcase';
+import ContactShowcase from '@/components/ContactShowcase';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -170,6 +171,22 @@ export default function Home() {
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <ProfileShowcase />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Contact Showcase — full width overlay for section 5 */}
+            <AnimatePresence mode="wait">
+              {activeSection === 5 && (
+                <motion.div 
+                  key="contact-showcase"
+                  className={styles.sectionOverlay}
+                  initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -45, filter: 'blur(12px)' }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ContactShowcase />
                 </motion.div>
               )}
             </AnimatePresence>
