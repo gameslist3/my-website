@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './ContactShowcase.module.css';
 
@@ -15,33 +15,35 @@ const ICONS = [
 
 export default function ContactShowcase() {
   const [activeIconIndex, setActiveIconIndex] = useState(Math.floor(ICONS.length / 2));
-  const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [explodingIndex, setExplodingIndex] = useState<number | null>(null);
-  const [flashIndex, setFlashIndex] = useState<number | null>(null);
   const [shakingIndex, setShakingIndex] = useState<number | null>(null);
-  const [randomFlashActive, setRandomFlashActive] = useState(false);
+  const [greenPeakIndex, setGreenPeakIndex] = useState<number | null>(null); // green glow at peak size
+  const [flashGreen, setFlashGreen] = useState(false); // white↔green flash during shake
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
 
+  // ── Randomized shake keyframes (regenerated each click) ──
+  const [shakeKF, setShakeKF] = useState<{ x: number[]; y: number[]; scale: number[] } | null>(null);
+
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // ── Burst particles config (computed once) ──
+  // ── Burst particles config (3x bigger) ──
   const burstParticles = useMemo(() =>
-    Array.from({ length: 70 }, (_, i) => {
-      const angle = (i / 70) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const dist = 30 + Math.random() * 100;
+    Array.from({ length: 120 }, (_, i) => {
+      const angle = (i / 120) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+      const dist = 60 + Math.random() * 200;
       return {
         x: Math.cos(angle) * dist,
         y: Math.sin(angle) * dist,
-        size: 1.5 + Math.random() * 2.5,
+        size: 4 + Math.random() * 8,
         delay: Math.random() * 0.15,
         color: Math.random() > 0.4 ? '#b2f548' : '#ffffff',
       };
     }), []
   );
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoDurationRef = useRef(5);
+  // ── Progressive dribble particles emitted during shake ──
+  const [dribbleParticles, setDribbleParticles] = useState<Array<{ id: number; x: number; y: number; size: number; color: string }>>([]);
 
   // ── Track desktop for wider icon gaps ──
   useEffect(() => {
@@ -51,82 +53,82 @@ export default function ContactShowcase() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // ── Preload video on mount & capture its duration ──
-  useEffect(() => {
-    const v = videoRef.current;
-    if (v) {
-      v.loop = true;
-      v.play().catch(() => {});
-
-      const onMetaLoaded = () => {
-        videoDurationRef.current = v.duration || 5;
-      };
-      v.addEventListener('loadedmetadata', onMetaLoaded);
-      if (v.readyState >= 1) {
-        videoDurationRef.current = v.duration || 5;
-      }
-      return () => v.removeEventListener('loadedmetadata', onMetaLoaded);
-    }
-  }, []);
-
-  // ── Handle video ending after click animation ──
-  const handleVideoEnded = useCallback(() => {
-    if (videoPlaying && clickedIconIndex !== null) {
-      // Open link after video finishes
-      window.open(ICONS[clickedIconIndex].url, '_blank');
-      // Fade video out
-      setVideoPlaying(false);
-      setClickedIconIndex(null);
-      setFlashIndex(null);
-      setShakingIndex(null);
-      // Reset explosion after fade
-      setTimeout(() => setExplodingIndex(null), 800);
-      // Restore looping for background
-      if (videoRef.current) videoRef.current.loop = true;
-    }
-  }, [videoPlaying, clickedIconIndex]);
-
-  // ── Random white flashes during shake ──
+  // ── Progressive dribble particles emitted in waves during shake ──
   useEffect(() => {
     if (shakingIndex === null) {
-      setRandomFlashActive(false);
+      setDribbleParticles([]);
       return;
     }
 
     let cancelled = false;
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const startTime = Date.now();
+    let particleId = 0;
 
-    const scheduleNext = () => {
+    const emitWave = () => {
       if (cancelled) return;
-      const delay = 120 + Math.random() * 480; // 120–600ms between flashes
-      const t = setTimeout(() => {
-        if (cancelled) return;
-        setRandomFlashActive(true);
-        const flashDuration = 50 + Math.random() * 100; // 50–150ms flash
-        const f = setTimeout(() => {
-          if (cancelled) return;
-          setRandomFlashActive(false);
-          scheduleNext();
-        }, flashDuration);
-        timeouts.push(f);
-      }, delay);
-      timeouts.push(t);
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / 1500, 1);
+
+      const count = Math.ceil(1 + progress * 6);
+      const wave: Array<{ id: number; x: number; y: number; size: number; color: string }> = [];
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 8 + Math.random() * 70 * (0.2 + progress * 0.8);
+        const size = 2 + Math.random() * 4 * (0.3 + progress * 0.7);
+        wave.push({
+          id: particleId++,
+          x: Math.cos(angle) * dist,
+          y: Math.sin(angle) * dist,
+          size,
+          color: Math.random() > 0.3 ? '#b2f548' : '#ffffff',
+        });
+      }
+
+      setDribbleParticles(prev => [...prev, ...wave]);
+
+      if (progress < 1) {
+        const nextDelay = Math.max(40, 250 - progress * 190);
+        setTimeout(emitWave, nextDelay);
+      }
     };
 
-    scheduleNext();
+    setTimeout(emitWave, 80);
 
-    return () => {
-      cancelled = true;
-      timeouts.forEach(clearTimeout);
-      setRandomFlashActive(false);
-    };
+    return () => { cancelled = true; };
   }, [shakingIndex]);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // ── White/green flashing effect during shake ──
+  useEffect(() => {
+    if (shakingIndex === null) {
+      setFlashGreen(false);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setFlashGreen(prev => !prev);
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, [shakingIndex]);
+
+  // ── Handle video ending — open the link ──
+  const handleVideoEnded = useCallback(() => {
+    if (clickedIconIndex !== null) {
+      window.open(ICONS[clickedIconIndex].url, '_blank');
+    }
+    setVideoPlaying(false);
+    setClickedIconIndex(null);
+    setGreenPeakIndex(null);
+    setShakingIndex(null);
+    setTimeout(() => setExplodingIndex(null), 800);
+  }, [clickedIconIndex]);
 
   // ── Search/Ask State ──
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const askBoxRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +147,6 @@ export default function ContactShowcase() {
       if (askBoxRef.current && !askBoxRef.current.contains(e.target as Node)) {
         setSearchOpen(false);
         setSearchQuery('');
-        setAnswer(null);
       }
     };
     const t = setTimeout(() => document.addEventListener('mousedown', handleClick), 50);
@@ -162,70 +163,67 @@ export default function ContactShowcase() {
       if (e.key === 'Escape') {
         setSearchOpen(false);
         setSearchQuery('');
-        setAnswer(null);
       }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [searchOpen]);
 
-  // ── Handle clicking an icon ──
+  // ── Handle clicking an icon — instant shake+bubble → explode ──
   const handleIconClick = (index: number) => {
     if (index !== activeIconIndex) {
       setActiveIconIndex(index);
       return;
     }
 
-    // If already animating, ignore
-    if (glowingIndex !== null || shakingIndex !== null || explodingIndex !== null) return;
+    // If already animating or in the pre-animation delay, ignore
+    if (shakingIndex !== null || explodingIndex !== null || clickedIconIndex !== null) return;
 
-    // Store which icon was clicked
+    // Store clicked icon & play video background
     setClickedIconIndex(index);
+    setVideoPlaying(true);
+    const v = videoRef.current;
+    if (v) {
+      v.loop = false;
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    }
 
-    // Start glow
-    setGlowingIndex(index);
+    // Generate random shake keyframes — random directions, growing like a bubble
+    const numFrames = 14;
+    const xArr = [0];
+    const yArr = [0];
+    const scaleArr = [1.5]; // starts at current center scale
+    for (let i = 1; i < numFrames; i++) {
+      const t = i / (numFrames - 1);
+      const intensity = 1 + t * t * 24;
+      const angle = Math.random() * Math.PI * 2; // random direction every frame
+      xArr.push(Math.cos(angle) * intensity);
+      yArr.push(Math.sin(angle) * intensity);
+      scaleArr.push(1.5 + t * 2.5); // grows 1.5x → 4x
+    }
+    setShakeKF({ x: xArr, y: yArr, scale: scaleArr });
 
-    // After brief glow, play video and delay particles to when hand opens
+    // ── Shake + flash starts instantly ──
+    setShakingIndex(index);
+
+    // After shake completes (~1.5s), first turn green then burst into particles
     setTimeout(() => {
-      setGlowingIndex(null);
-      setVideoPlaying(true);
+      setGreenPeakIndex(index); // 🔥 green glow at peak size
+      setShakingIndex(null);
 
-      const v = videoRef.current;
-      if (v) {
-        v.loop = false;
-        v.currentTime = 0;
-        v.play().catch(() => {});
-      }
-
-      // Delay particles to when hand opens in the video (~25% of duration)
-      // and animate until just before hand closes (~78% of duration)
-      const vidDuration = videoDurationRef.current;
-      const handOpenTime = vidDuration * 0.25;   // when hand is fully open
-      const handCloseTime = vidDuration * 0.78;  // just before hand closes
-
+      // Brief green moment, then explosion
       setTimeout(() => {
-        // Brief white flash right before explosion
-        setFlashIndex(index);
+        setGreenPeakIndex(null);
+        setExplodingIndex(index);
 
+        // Auto-clear explosion after particles finish
         setTimeout(() => {
-          setFlashIndex(null);
-          // Start escalating shake animation
-          setShakingIndex(index);
-
-          // After shake completes (~1.5s), burst into particles
-          setTimeout(() => {
-            setShakingIndex(null);
-            setExplodingIndex(index);
-
-            // Auto-clear explosion after particles finish
-            setTimeout(() => {
-              setExplodingIndex(null);
-            }, 2000);
-          }, 1500);
-        }, 150);
-      }, handOpenTime * 1000); // convert to ms
-
-    }, 500);
+          setExplodingIndex(null);
+          setShakeKF(null);
+        }, 2000);
+      }, 250);
+    }, 1500);
   };
 
   // ── Drag handlers ──
@@ -238,38 +236,9 @@ export default function ContactShowcase() {
     }
   };
 
-  // ── Handle Ask Search ──
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim()) return;
-    setIsSearching(true);
-    setAnswer(null);
-
-    try {
-      const response = await fetch('/api/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery }),
-      });
-
-      if (response.ok) {
-        const res = await response.json();
-        setAnswer({ text: res.answer, generic: res.generic });
-        setIsSearching(false);
-        return;
-      }
-    } catch (serverError) {
-      console.warn("Serverless route unavailable, falling back...", serverError);
-    }
-
-    setTimeout(() => {
-      setAnswer({ text: "I'm Shubham Roy, a UI/UX & Product Designer. Reach me out via the contact icons below!", generic: true });
-      setIsSearching(false);
-    }, 1000);
-  }, [searchQuery]);
-
   return (
     <div className={styles.container}>
-      {/* Background Video — preloaded on mount, plays through once on click */}
+      {/* Background Video — plays once on icon click */}
       <video
         ref={videoRef}
         className={`${styles.bgVideo} ${videoPlaying ? styles.bgVideoPlaying : ''}`}
@@ -279,7 +248,7 @@ export default function ContactShowcase() {
         onEnded={handleVideoEnded}
       />
 
-      {/* Top Ask Bar — expands inline downward on click */}
+      {/* Top Ask Bar — minimal: search icon + typing input only */}
       <div className={styles.askBarContainer}>
         <motion.div
           ref={askBoxRef}
@@ -291,53 +260,33 @@ export default function ContactShowcase() {
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
                 <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                 <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+              </svg>
             </div>
-            <span>{searchOpen ? 'Ask anything...' : 'Ask anything...'}</span>
           </div>
 
           <AnimatePresence>
             {searchOpen && (
               <motion.div
                 className={styles.askDropdown}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                initial={{ height: 0, opacity: 0, y: -8 }}
+                animate={{ height: 'auto', opacity: 1, y: 0 }}
+                exit={{ height: 0, opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className={styles.searchInputWrapper}>
+                <div className={styles.typingArea}>
                   <div className={styles.searchIcon}>
-                    {isSearching ? (
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="31.4 31.4">
-                          <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
-                        </circle>
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-                        <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z" fill="currentColor"/>
-                      </svg>
-                    )}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                      <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z" fill="currentColor"/>
+                    </svg>
                   </div>
                   <input
                     ref={inputRef}
                     className={styles.searchInput}
-                    placeholder="Ask anything about me..."
+                    placeholder="Ask anything..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   />
                 </div>
-
-                {answer ? (
-                  <motion.div className={styles.answerArea} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className={styles.answerContent}>{answer.text}</div>
-                  </motion.div>
-                ) : (
-                  <motion.div className={styles.hint} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    Press Enter to search
-                  </motion.div>
-                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -356,35 +305,29 @@ export default function ContactShowcase() {
           {ICONS.map((icon, index) => {
             const offset = index - activeIconIndex;
             const isCenter = index === activeIconIndex;
-            const isGlowing = index === glowingIndex;
-            const isFlashing = index === flashIndex;
             const isShaking = index === shakingIndex;
-            const isRandomFlashing = isShaking && randomFlashActive;
             const isExploding = index === explodingIndex;
+            const isGreenPeak = index === greenPeakIndex;
 
             // Cover flow: center is largest, adjacent smaller, further smaller
             const absOffset = Math.abs(offset);
             const scale = isCenter ? 1.5 : Math.max(0.5, 1.35 - absOffset * 0.25);
             const x = offset * (isDesktop ? 190 : 130);
-            const zIndex = isCenter || isGlowing || isExploding ? 20 : 10 - absOffset;
+            const zIndex = isCenter || isExploding ? 20 : 10 - absOffset;
 
-            // During animation (glow → shake → explosion), only the clicked icon is visible
-            const animationActiveIndex = glowingIndex ?? shakingIndex ?? clickedIconIndex;
-            const isAnimationActive = animationActiveIndex !== null;
-            const isIconHidden = isAnimationActive && index !== animationActiveIndex;
+            // During animation, only the animated icon is visible
+            const activeAnimIndex = shakingIndex ?? greenPeakIndex ?? explodingIndex;
+            const isAnimationActive = activeAnimIndex !== null;
+            const isIconHidden = isAnimationActive && index !== activeAnimIndex;
 
             let opacity;
             if (isIconHidden) {
-              opacity = 0; // hide non-clicked icons
+              opacity = 0;
             } else if (isExploding) {
               opacity = 0; // exploded icon fades out
             } else {
               opacity = isCenter ? 1 : Math.max(0.35, 1 - absOffset * 0.18);
             }
-
-            // Escalating shake (starts barely noticeable, builds to violent)
-            const shakingX = isShaking ? [0, -0.5, 0.8, -1.5, 2.5, -4.5, 7, -12, 18, -28, 40] : undefined;
-            const shakingY = isShaking ? [0, 0.3, -0.5, 1, -1.5, 2.5, -4, 6.5, -10, 15, -20] : undefined;
 
             // Shrink + fade out when exploding
             const explodingScale = isExploding ? 0 : undefined;
@@ -396,19 +339,18 @@ export default function ContactShowcase() {
                 className={`
                   ${styles.iconItem}
                   ${isCenter ? styles.iconCenter : ''}
-                  ${isGlowing ? styles.glowing : ''}
-                  ${isFlashing ? styles.flashing : ''}
                   ${isShaking ? styles.shaking : ''}
-                  ${isRandomFlashing ? styles.randomFlash : ''}
+                  ${(isShaking && flashGreen) ? styles.flashGreen : ''}
+                  ${isGreenPeak ? styles.greenPeak : ''}
                   ${isExploding ? styles.exploding : ''}
                 `}
                 initial={false}
                 animate={{
-                  x: isExploding ? 0 : isShaking ? shakingX : x,
-                  y: isShaking ? shakingY : 0,
-                  scale: isExploding ? explodingScale : isShaking ? scale : scale,
+                  x: isExploding ? 0 : (isShaking && shakeKF ? shakeKF.x : x),
+                  y: isShaking && shakeKF ? shakeKF.y : 0,
+                  scale: isExploding ? explodingScale : (isShaking && shakeKF ? shakeKF.scale : (isGreenPeak && shakeKF ? shakeKF.scale[shakeKF.scale.length - 1] : scale)),
                   zIndex,
-                  opacity: isExploding ? explodingOpacity : isShaking ? 1 : opacity,
+                  opacity: isExploding ? explodingOpacity : (isShaking ? 1 : opacity),
                 }}
                 transition={isExploding ? {
                   duration: 0.3,
@@ -416,7 +358,7 @@ export default function ContactShowcase() {
                 } : isShaking ? {
                   duration: 1.5,
                   ease: 'easeInOut',
-                  times: [0, 0.06, 0.12, 0.2, 0.3, 0.42, 0.55, 0.67, 0.78, 0.88, 1],
+                  times: [0, 0.04, 0.08, 0.14, 0.22, 0.32, 0.44, 0.56, 0.68, 0.8, 0.9, 0.96, 0.99, 1],
                 } : {
                   type: 'spring',
                   stiffness: 260,
@@ -439,6 +381,32 @@ export default function ContactShowcase() {
         <div id={styles.particles3} />
       </div>
 
+      {/* ── Progressive dribble particles emitted during shake ── */}
+      {dribbleParticles.length > 0 && (
+        <div className={styles.burstContainer}>
+          {dribbleParticles.map((p) => (
+            <motion.div
+              key={p.id}
+              className={styles.burstParticle}
+              style={{
+                width: p.size,
+                height: p.size,
+                background: p.color,
+                boxShadow: p.color === '#b2f548'
+                  ? `0 0 3px ${p.color}, 0 0 8px rgba(178, 245, 72, 0.25)`
+                  : `0 0 2px ${p.color}, 0 0 5px rgba(255, 255, 255, 0.15)`,
+              }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+              animate={{ x: p.x, y: p.y, opacity: 0, scale: 0 }}
+              transition={{
+                duration: 0.7,
+                ease: 'easeOut',
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* ── Burst particles when icon explodes ── */}
       {explodingIndex !== null && (
         <div className={styles.burstContainer}>
@@ -456,13 +424,13 @@ export default function ContactShowcase() {
               }}
               initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
               animate={{
-                x: p.x * 1.8,
-                y: p.y * 1.8,
+                x: p.x * 3.0,
+                y: p.y * 3.0,
                 opacity: [1, 0.8, 0.3, 0],
                 scale: [1, 0.8, 0.3, 0],
               }}
               transition={{
-                duration: 1.8,
+                duration: 2.0,
                 delay: p.delay,
                 times: [0, 0.2, 0.6, 1],
                 ease: [0.25, 0.46, 0.45, 0.94],
