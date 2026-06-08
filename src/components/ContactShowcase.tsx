@@ -19,6 +19,7 @@ export default function ContactShowcase() {
   const [explodingIndex, setExplodingIndex] = useState<number | null>(null);
   const [flashIndex, setFlashIndex] = useState<number | null>(null);
   const [shakingIndex, setShakingIndex] = useState<number | null>(null);
+  const [randomFlashActive, setRandomFlashActive] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
 
@@ -84,6 +85,42 @@ export default function ContactShowcase() {
       if (videoRef.current) videoRef.current.loop = true;
     }
   }, [videoPlaying, clickedIconIndex]);
+
+  // ── Random white flashes during shake ──
+  useEffect(() => {
+    if (shakingIndex === null) {
+      setRandomFlashActive(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+
+    const scheduleNext = () => {
+      if (cancelled) return;
+      const delay = 120 + Math.random() * 480; // 120–600ms between flashes
+      const t = setTimeout(() => {
+        if (cancelled) return;
+        setRandomFlashActive(true);
+        const flashDuration = 50 + Math.random() * 100; // 50–150ms flash
+        const f = setTimeout(() => {
+          if (cancelled) return;
+          setRandomFlashActive(false);
+          scheduleNext();
+        }, flashDuration);
+        timeouts.push(f);
+      }, delay);
+      timeouts.push(t);
+    };
+
+    scheduleNext();
+
+    return () => {
+      cancelled = true;
+      timeouts.forEach(clearTimeout);
+      setRandomFlashActive(false);
+    };
+  }, [shakingIndex]);
 
   // ── Search/Ask State ──
   const [searchOpen, setSearchOpen] = useState(false);
@@ -322,6 +359,7 @@ export default function ContactShowcase() {
             const isGlowing = index === glowingIndex;
             const isFlashing = index === flashIndex;
             const isShaking = index === shakingIndex;
+            const isRandomFlashing = isShaking && randomFlashActive;
             const isExploding = index === explodingIndex;
 
             // Cover flow: center is largest, adjacent smaller, further smaller
@@ -344,8 +382,9 @@ export default function ContactShowcase() {
               opacity = isCenter ? 1 : Math.max(0.35, 1 - absOffset * 0.18);
             }
 
-            // Escalating shake animation values (slow to heavy)
-            const shakingX = isShaking ? [0, -2, 3, -5, 8, -12, 16, -22, 28] : undefined;
+            // Escalating shake (starts barely noticeable, builds to violent)
+            const shakingX = isShaking ? [0, -0.5, 0.8, -1.5, 2.5, -4.5, 7, -12, 18, -28, 40] : undefined;
+            const shakingY = isShaking ? [0, 0.3, -0.5, 1, -1.5, 2.5, -4, 6.5, -10, 15, -20] : undefined;
 
             // Shrink + fade out when exploding
             const explodingScale = isExploding ? 0 : undefined;
@@ -359,11 +398,14 @@ export default function ContactShowcase() {
                   ${isCenter ? styles.iconCenter : ''}
                   ${isGlowing ? styles.glowing : ''}
                   ${isFlashing ? styles.flashing : ''}
+                  ${isShaking ? styles.shaking : ''}
+                  ${isRandomFlashing ? styles.randomFlash : ''}
                   ${isExploding ? styles.exploding : ''}
                 `}
                 initial={false}
                 animate={{
                   x: isExploding ? 0 : isShaking ? shakingX : x,
+                  y: isShaking ? shakingY : 0,
                   scale: isExploding ? explodingScale : isShaking ? scale : scale,
                   zIndex,
                   opacity: isExploding ? explodingOpacity : isShaking ? 1 : opacity,
@@ -374,7 +416,7 @@ export default function ContactShowcase() {
                 } : isShaking ? {
                   duration: 1.5,
                   ease: 'easeInOut',
-                  times: [0, 0.1, 0.2, 0.35, 0.5, 0.65, 0.78, 0.88, 1],
+                  times: [0, 0.06, 0.12, 0.2, 0.3, 0.42, 0.55, 0.67, 0.78, 0.88, 1],
                 } : {
                   type: 'spring',
                   stiffness: 260,
