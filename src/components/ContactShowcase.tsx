@@ -40,8 +40,18 @@ export default function ContactShowcase() {
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
   const [particleDuration, setParticleDuration] = useState(2.0);
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoDurationRef = useRef(5);
+
+  // ── Track desktop for wider icon gaps ──
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // ── Preload video on mount & capture its duration ──
   useEffect(() => {
@@ -164,8 +174,8 @@ export default function ContactShowcase() {
 
         setTimeout(() => {
           setFlashIndex(null);
-          // Particle duration = time from hand open to just before close (slowed down 1.5x)
-          const pDur = Math.max((handCloseTime - handOpenTime - 0.3) * 1.5, 1.5);
+          // Particle duration = time from hand open to just before close (slowed down 1.5x) + 1.5s extra
+          const pDur = Math.max((handCloseTime - handOpenTime - 0.3) * 1.5, 1.5) + 1.5;
           setParticleDuration(pDur);
           setExplodingIndex(index);
         }, 150);
@@ -309,7 +319,7 @@ export default function ContactShowcase() {
             // Cover flow: center is largest, adjacent smaller, further smaller
             const absOffset = Math.abs(offset);
             const scale = isCenter ? 1.5 : Math.max(0.5, 1.35 - absOffset * 0.25);
-            const x = offset * 130;
+            const x = offset * (isDesktop ? 190 : 130);
             const zIndex = isCenter || isGlowing || isExploding ? 20 : 10 - absOffset;
 
             // During animation (glow → video → explosion), only the clicked icon is visible
@@ -326,6 +336,11 @@ export default function ContactShowcase() {
               opacity = isCenter ? 1 : Math.max(0.35, 1 - absOffset * 0.18);
             }
 
+            // Shrink + shake animation values when exploding
+            const explodingX = isExploding ? [0, -6, 5, -3, 0] : undefined;
+            const explodingScale = isExploding ? [1.5, 1.2, 0.8, 0.4, 0] : undefined;
+            const explodingOpacity = isExploding ? [1, 0.8, 0.5, 0.2, 0] : undefined;
+
             return (
               <motion.div
                 key={icon.id}
@@ -338,12 +353,16 @@ export default function ContactShowcase() {
                 `}
                 initial={false}
                 animate={{
-                  x,
-                  scale,
+                  x: isExploding ? explodingX : x,
+                  scale: isExploding ? explodingScale : scale,
                   zIndex,
-                  opacity,
+                  opacity: isExploding ? explodingOpacity : opacity,
                 }}
-                transition={{
+                transition={isExploding ? {
+                  duration: 0.5,
+                  ease: [0.34, 1.56, 0.64, 1],
+                  times: [0, 0.15, 0.4, 0.7, 1],
+                } : {
                   type: 'spring',
                   stiffness: 260,
                   damping: 28,
@@ -357,6 +376,26 @@ export default function ContactShowcase() {
           })}
         </motion.div>
       </div>
+
+      {/* ── Green glow overlay during particle animation ── */}
+      {explodingIndex !== null && (
+        <div className={styles.greenGlowWrap}>
+          <motion.div
+            className={styles.greenGlow}
+            initial={{ opacity: 0, width: 120, height: 120 }}
+            animate={{
+              opacity: [0, 0.5, 0.2, 0.4, 0],
+              width: [120, 520, 300, 600, 200],
+              height: [120, 520, 300, 600, 200],
+            }}
+            transition={{
+              duration: particleDuration,
+              times: [0, 0.15, 0.4, 0.7, 1],
+              ease: 'easeInOut',
+            }}
+          />
+        </div>
+      )}
 
       {/* ── Screen-center dust particles (played over bg video) ── */}
       {explodingIndex !== null && (

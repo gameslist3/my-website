@@ -185,6 +185,23 @@
   }
 }
 
+/* ── Green glow overlay during particle animation ── */
+.greenGlowWrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.greenGlow {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(178, 245, 72, 0.35) 0%, rgba(178, 245, 72, 0.1) 30%, transparent 70%);
+  border-radius: 50%;
+}
+
 /* ── Dust Particles ── */
 .dustContainer {
   position: absolute;
