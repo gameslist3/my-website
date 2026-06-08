@@ -13,24 +13,6 @@ const ICONS = [
   { id: 'coffee', src: '/images/contact/buy-me-a-coffee.svg', url: 'https://www.buymeacoffee.com/' },
 ];
 
-// ── Particle burst config (computed once) ──
-const PARTICLE_COUNT = 120;
-const PARTICLE_COLORS = ['#b2f548', '#9e9e9e', '#7a7a7a', '#8bc34a', '#d4d4d4', '#a5d6a7'];
-const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-  const angle = (i / PARTICLE_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
-  const spread = 60 + Math.random() * 140;
-  const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)];
-  return {
-    angle,
-    spread,
-    delay: Math.random() * 0.1,
-    size: 1.5 + Math.random() * 2,
-    color,
-    isGreen: color === '#b2f548' || color === '#8bc34a' || color === '#a5d6a7',
-    spin: (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720),
-  };
-});
-
 export default function ContactShowcase() {
   const [activeIconIndex, setActiveIconIndex] = useState(Math.floor(ICONS.length / 2));
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
@@ -38,7 +20,6 @@ export default function ContactShowcase() {
   const [flashIndex, setFlashIndex] = useState<number | null>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
-  const [particleDuration, setParticleDuration] = useState(2.0);
 
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -174,9 +155,6 @@ export default function ContactShowcase() {
 
         setTimeout(() => {
           setFlashIndex(null);
-          // Particle duration = time from hand open to just before close (slowed down 1.5x) + 1.5s extra
-          const pDur = Math.max((handCloseTime - handOpenTime - 0.3) * 1.5, 1.5) + 1.5;
-          setParticleDuration(pDur);
           setExplodingIndex(index);
         }, 150);
       }, handOpenTime * 1000); // convert to ms
@@ -377,64 +355,12 @@ export default function ContactShowcase() {
         </motion.div>
       </div>
 
-      {/* ── Green glow overlay during particle animation ── */}
-      {explodingIndex !== null && (
-        <div className={styles.greenGlowWrap}>
-          <motion.div
-            className={styles.greenGlow}
-            initial={{ opacity: 0, width: 120, height: 120 }}
-            animate={{
-              opacity: [0, 0.5, 0.2, 0.4, 0],
-              width: [120, 520, 300, 600, 200],
-              height: [120, 520, 300, 600, 200],
-            }}
-            transition={{
-              duration: particleDuration,
-              times: [0, 0.15, 0.4, 0.7, 1],
-              ease: 'easeInOut',
-            }}
-          />
-        </div>
-      )}
-
-      {/* ── Screen-center dust particles (played over bg video) ── */}
-      {explodingIndex !== null && (
-        <div className={styles.dustContainer}>
-          {particles.map((p, i) => (
-            <motion.div
-              key={i}
-              className={styles.particle}
-              style={{
-                width: p.size,
-                height: p.size,
-                background: p.color,
-                boxShadow: p.isGreen
-                  ? `0 0 6px ${p.color}, 0 0 16px rgba(178, 245, 72, 0.25)`
-                  : `0 0 4px ${p.color}, 0 0 10px rgba(128, 128, 128, 0.15)`,
-              }}
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
-              animate={{
-                x: p.isGreen
-                  ? [0, Math.cos(p.angle) * p.spread * 0.6, Math.cos(p.angle) * p.spread, Math.cos(p.angle) * p.spread * 1.15]
-                  : [0, Math.cos(p.angle) * 12, Math.cos(p.angle) * 20, Math.cos(p.angle) * 25],
-                y: p.isGreen
-                  ? [0, Math.sin(p.angle) * p.spread * 0.6, Math.sin(p.angle) * p.spread, Math.sin(p.angle) * p.spread * 1.15]
-                  : [0, -p.spread * 0.3, -p.spread * 0.7, -p.spread * 1.05],
-                opacity: [1, 1, 0.8, 0],
-                scale: [1, 1.3, 1, 0.3],
-                rotate: [0, p.spin * 0.3, p.spin * 0.7, p.spin],
-              }}
-              transition={{
-                duration: particleDuration,
-                delay: p.delay,
-                times: [0, 0.15, 0.7, 1],
-                ease: [0.43, 0.13, 0.23, 0.96],
-              }}
-            />
-          ))}
-        </div>
-      )}
-
+      {/* ── Background dust particles (CSS box-shadow animation) ── */}
+      <div className={styles.bgDust}>
+        <div id={styles.particles} />
+        <div id={styles.particles2} />
+        <div id={styles.particles3} />
+      </div>
 
     </div>
   );
