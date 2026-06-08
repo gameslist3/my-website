@@ -94,10 +94,6 @@
   flex-direction: column;
   align-items: center;
   transform-origin: top center;
-  background: linear-gradient(to top, transparent, rgb(178, 245, 72) 40%, transparent 70%);
-  background-size: 100% 300%;
-  background-position: 0% 100%;
-  animation: ropeGradientRise 4s ease-in-out infinite;
 }
 
 @keyframes ropeGradientRise {
@@ -111,14 +107,17 @@
 @keyframes swing2 { 0% { transform: rotate(-2deg); } 100% { transform: rotate(4deg); } }
 @keyframes swing3 { 0% { transform: rotate(-5deg); } 100% { transform: rotate(5deg); } }
 
-.swing0 { animation: swing0 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
-.swing1 { animation: swing1 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
-.swing2 { animation: swing2 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
-.swing3 { animation: swing3 var(--swing-dur) ease-in-out infinite alternate var(--swing-del); }
+.swing0 { animation: swing0 var(--swing-dur) ease-in-out infinite alternate var(--swing-del), ropeGradientRise 4s ease-in-out infinite; }
+.swing1 { animation: swing1 var(--swing-dur) ease-in-out infinite alternate var(--swing-del), ropeGradientRise 4s ease-in-out infinite; }
+.swing2 { animation: swing2 var(--swing-dur) ease-in-out infinite alternate var(--swing-del), ropeGradientRise 4s ease-in-out infinite; }
+.swing3 { animation: swing3 var(--swing-dur) ease-in-out infinite alternate var(--swing-del), ropeGradientRise 4s ease-in-out infinite; }
 
 .ropeLine {
   width: 2px;
-  background: linear-gradient(to bottom, rgba(178, 245, 72, 0.2), #b2f548);
+  background: linear-gradient(to top, transparent, rgb(178, 245, 72) 40%, transparent 70%);
+  background-size: 100% 300%;
+  background-position: 0% 100%;
+  animation: ropeGradientRise 4s ease-in-out infinite;
   position: relative;
   display: flex;
   flex-direction: column;

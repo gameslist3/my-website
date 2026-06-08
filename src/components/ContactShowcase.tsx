@@ -14,15 +14,20 @@ const ICONS = [
 ];
 
 // ── Particle burst config (computed once) ──
-const PARTICLE_COUNT = 50;
+const PARTICLE_COUNT = 120;
+const PARTICLE_COLORS = ['#b2f548', '#9e9e9e', '#7a7a7a', '#8bc34a', '#d4d4d4', '#a5d6a7'];
 const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-  const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
-  const spread = 120 + Math.random() * 230;
+  const angle = (i / PARTICLE_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+  const spread = 60 + Math.random() * 140;
+  const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)];
   return {
     angle,
     spread,
-    delay: Math.random() * 0.2,
-    size: 4 + Math.random() * 6,
+    delay: Math.random() * 0.1,
+    size: 1.5 + Math.random() * 2,
+    color,
+    isGreen: color === '#b2f548' || color === '#8bc34a' || color === '#a5d6a7',
+    spin: (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720),
   };
 });
 
@@ -30,6 +35,7 @@ export default function ContactShowcase() {
   const [activeIconIndex, setActiveIconIndex] = useState(Math.floor(ICONS.length / 2));
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [explodingIndex, setExplodingIndex] = useState<number | null>(null);
+  const [flashIndex, setFlashIndex] = useState<number | null>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
   const [particleDuration, setParticleDuration] = useState(2.0);
@@ -63,6 +69,7 @@ export default function ContactShowcase() {
       // Fade video out
       setVideoPlaying(false);
       setClickedIconIndex(null);
+      setFlashIndex(null);
       // Reset explosion after fade
       setTimeout(() => setExplodingIndex(null), 800);
       // Restore looping for background
@@ -130,27 +137,40 @@ export default function ContactShowcase() {
     // Store which icon was clicked
     setClickedIconIndex(index);
 
-    // Compute particle duration so it ends ~1s before video ends
-    const vidDuration = videoDurationRef.current;
-    const pDur = Math.max(vidDuration - 1.5, 1.5); // 0.5s glow offset + 1s buffer before video end
-    setParticleDuration(pDur);
-
     // Start glow
     setGlowingIndex(index);
 
-    // After brief glow, start explosion + play video (no loop, restart)
+    // After brief glow, play video and delay particles to when hand opens
     setTimeout(() => {
-      setExplodingIndex(index);
       setGlowingIndex(null);
       setVideoPlaying(true);
 
-      // Play video from start without looping (so it ends naturally)
       const v = videoRef.current;
       if (v) {
         v.loop = false;
         v.currentTime = 0;
         v.play().catch(() => {});
       }
+
+      // Delay particles to when hand opens in the video (~25% of duration)
+      // and animate until just before hand closes (~78% of duration)
+      const vidDuration = videoDurationRef.current;
+      const handOpenTime = vidDuration * 0.25;   // when hand is fully open
+      const handCloseTime = vidDuration * 0.78;  // just before hand closes
+
+      setTimeout(() => {
+        // Brief white flash right before explosion
+        setFlashIndex(index);
+
+        setTimeout(() => {
+          setFlashIndex(null);
+          // Particle duration = time from hand open to just before close (slowed down 1.5x)
+          const pDur = Math.max((handCloseTime - handOpenTime - 0.3) * 1.5, 1.5);
+          setParticleDuration(pDur);
+          setExplodingIndex(index);
+        }, 150);
+      }, handOpenTime * 1000); // convert to ms
+
     }, 500);
   };
 
@@ -283,6 +303,7 @@ export default function ContactShowcase() {
             const offset = index - activeIconIndex;
             const isCenter = index === activeIconIndex;
             const isGlowing = index === glowingIndex;
+            const isFlashing = index === flashIndex;
             const isExploding = index === explodingIndex;
 
             // Cover flow: center is largest, adjacent smaller, further smaller
@@ -290,7 +311,20 @@ export default function ContactShowcase() {
             const scale = isCenter ? 1.5 : Math.max(0.5, 1.35 - absOffset * 0.25);
             const x = offset * 130;
             const zIndex = isCenter || isGlowing || isExploding ? 20 : 10 - absOffset;
-            const opacity = isExploding ? 0 : Math.max(0.35, 1 - absOffset * 0.18);
+
+            // During animation (glow → video → explosion), only the clicked icon is visible
+            const animationActiveIndex = glowingIndex ?? clickedIconIndex;
+            const isAnimationActive = animationActiveIndex !== null;
+            const isIconHidden = isAnimationActive && index !== animationActiveIndex;
+
+            let opacity;
+            if (isIconHidden) {
+              opacity = 0; // hide non-clicked icons
+            } else if (isExploding) {
+              opacity = 0; // exploded icon fades out
+            } else {
+              opacity = isCenter ? 1 : Math.max(0.35, 1 - absOffset * 0.18);
+            }
 
             return (
               <motion.div
@@ -299,6 +333,7 @@ export default function ContactShowcase() {
                   ${styles.iconItem}
                   ${isCenter ? styles.iconCenter : ''}
                   ${isGlowing ? styles.glowing : ''}
+                  ${isFlashing ? styles.flashing : ''}
                   ${isExploding ? styles.exploding : ''}
                 `}
                 initial={false}
@@ -333,19 +368,28 @@ export default function ContactShowcase() {
               style={{
                 width: p.size,
                 height: p.size,
+                background: p.color,
+                boxShadow: p.isGreen
+                  ? `0 0 6px ${p.color}, 0 0 16px rgba(178, 245, 72, 0.25)`
+                  : `0 0 4px ${p.color}, 0 0 10px rgba(128, 128, 128, 0.15)`,
               }}
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
               animate={{
-                x: [0, Math.cos(p.angle) * p.spread * 0.6, Math.cos(p.angle) * p.spread, Math.cos(p.angle) * p.spread * 1.15],
-                y: [0, Math.sin(p.angle) * p.spread * 0.6, Math.sin(p.angle) * p.spread, Math.sin(p.angle) * p.spread * 1.15],
+                x: p.isGreen
+                  ? [0, Math.cos(p.angle) * p.spread * 0.6, Math.cos(p.angle) * p.spread, Math.cos(p.angle) * p.spread * 1.15]
+                  : [0, Math.cos(p.angle) * 12, Math.cos(p.angle) * 20, Math.cos(p.angle) * 25],
+                y: p.isGreen
+                  ? [0, Math.sin(p.angle) * p.spread * 0.6, Math.sin(p.angle) * p.spread, Math.sin(p.angle) * p.spread * 1.15]
+                  : [0, -p.spread * 0.3, -p.spread * 0.7, -p.spread * 1.05],
                 opacity: [1, 1, 0.8, 0],
                 scale: [1, 1.3, 1, 0.3],
+                rotate: [0, p.spin * 0.3, p.spin * 0.7, p.spin],
               }}
               transition={{
                 duration: particleDuration,
                 delay: p.delay,
-                times: [0, 0.1, 0.75, 1],
-                ease: [0.25, 0.46, 0.45, 0.94],
+                times: [0, 0.15, 0.7, 1],
+                ease: [0.43, 0.13, 0.23, 0.96],
               }}
             />
           ))}
