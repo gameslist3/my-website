@@ -94,6 +94,16 @@
   flex-direction: column;
   align-items: center;
   transform-origin: top center;
+  background: linear-gradient(to top, transparent, rgb(178, 245, 72) 40%, transparent 70%);
+  background-size: 100% 300%;
+  background-position: 0% 100%;
+  animation: ropeGradientRise 4s ease-in-out infinite;
+}
+
+@keyframes ropeGradientRise {
+  0% { background-position: 0% 100%; }
+  50% { background-position: 0% 0%; }
+  100% { background-position: 0% 100%; }
 }
 
 @keyframes swing0 { 0% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
@@ -201,13 +211,13 @@
 }
 
 @keyframes example {
-  0% { color: lime; text-shadow: 0 0 20px green; }
-  25% { color: green; text-shadow: 2px 2px 2px lime; transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
-  40% { color: lime; text-shadow: none; transform: translate(-50%, -50%); }
-  50% { color: green; text-shadow: 5px 5px 2px blue, -5px -5px 2px red; transform: translate(-50%, calc(-50% + 5px)); }
-  70% { color: lime; text-shadow: none; transform: translate(-50%, -50%); }
-  80% { color: lime; text-shadow: 0 0 20px green; transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
-  100% { color: lime; text-shadow: none; }
+  0% { color: rgb(178, 245, 72); text-shadow: 0 0 20px rgba(178, 245, 72, 0.5); }
+  25% { color: rgb(178, 245, 72); text-shadow: 2px 2px 2px rgba(178, 245, 72, 0.3); transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
+  40% { color: rgb(178, 245, 72); text-shadow: none; transform: translate(-50%, -50%); }
+  50% { color: rgb(178, 245, 72); text-shadow: 5px 5px 2px rgba(140, 200, 50, 0.5), -5px -5px 2px rgba(178, 245, 72, 0.4); transform: translate(-50%, calc(-50% + 5px)); }
+  70% { color: rgb(178, 245, 72); text-shadow: none; transform: translate(-50%, -50%); }
+  80% { color: rgb(178, 245, 72); text-shadow: 0 0 20px rgba(178, 245, 72, 0.5); transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
+  100% { color: rgb(178, 245, 72); text-shadow: none; }
 }
 
 /* ── Glitch Effect ──────────────────────────── */
