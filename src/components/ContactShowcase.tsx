@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './ContactShowcase.module.css';
 
@@ -18,10 +18,26 @@ export default function ContactShowcase() {
   const [glowingIndex, setGlowingIndex] = useState<number | null>(null);
   const [explodingIndex, setExplodingIndex] = useState<number | null>(null);
   const [flashIndex, setFlashIndex] = useState<number | null>(null);
+  const [shakingIndex, setShakingIndex] = useState<number | null>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [clickedIconIndex, setClickedIconIndex] = useState<number | null>(null);
 
   const [isDesktop, setIsDesktop] = useState(false);
+
+  // ── Burst particles config (computed once) ──
+  const burstParticles = useMemo(() =>
+    Array.from({ length: 70 }, (_, i) => {
+      const angle = (i / 70) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+      const dist = 30 + Math.random() * 100;
+      return {
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        size: 1.5 + Math.random() * 2.5,
+        delay: Math.random() * 0.15,
+        color: Math.random() > 0.4 ? '#b2f548' : '#ffffff',
+      };
+    }), []
+  );
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoDurationRef = useRef(5);
@@ -61,6 +77,7 @@ export default function ContactShowcase() {
       setVideoPlaying(false);
       setClickedIconIndex(null);
       setFlashIndex(null);
+      setShakingIndex(null);
       // Reset explosion after fade
       setTimeout(() => setExplodingIndex(null), 800);
       // Restore looping for background
@@ -123,7 +140,7 @@ export default function ContactShowcase() {
     }
 
     // If already animating, ignore
-    if (glowingIndex !== null || explodingIndex !== null) return;
+    if (glowingIndex !== null || shakingIndex !== null || explodingIndex !== null) return;
 
     // Store which icon was clicked
     setClickedIconIndex(index);
@@ -155,7 +172,19 @@ export default function ContactShowcase() {
 
         setTimeout(() => {
           setFlashIndex(null);
-          setExplodingIndex(index);
+          // Start escalating shake animation
+          setShakingIndex(index);
+
+          // After shake completes (~1.5s), burst into particles
+          setTimeout(() => {
+            setShakingIndex(null);
+            setExplodingIndex(index);
+
+            // Auto-clear explosion after particles finish
+            setTimeout(() => {
+              setExplodingIndex(null);
+            }, 2000);
+          }, 1500);
         }, 150);
       }, handOpenTime * 1000); // convert to ms
 
@@ -292,6 +321,7 @@ export default function ContactShowcase() {
             const isCenter = index === activeIconIndex;
             const isGlowing = index === glowingIndex;
             const isFlashing = index === flashIndex;
+            const isShaking = index === shakingIndex;
             const isExploding = index === explodingIndex;
 
             // Cover flow: center is largest, adjacent smaller, further smaller
@@ -300,8 +330,8 @@ export default function ContactShowcase() {
             const x = offset * (isDesktop ? 190 : 130);
             const zIndex = isCenter || isGlowing || isExploding ? 20 : 10 - absOffset;
 
-            // During animation (glow → video → explosion), only the clicked icon is visible
-            const animationActiveIndex = glowingIndex ?? clickedIconIndex;
+            // During animation (glow → shake → explosion), only the clicked icon is visible
+            const animationActiveIndex = glowingIndex ?? shakingIndex ?? clickedIconIndex;
             const isAnimationActive = animationActiveIndex !== null;
             const isIconHidden = isAnimationActive && index !== animationActiveIndex;
 
@@ -314,10 +344,12 @@ export default function ContactShowcase() {
               opacity = isCenter ? 1 : Math.max(0.35, 1 - absOffset * 0.18);
             }
 
-            // Shrink + shake animation values when exploding
-            const explodingX = isExploding ? [0, -6, 5, -3, 0] : undefined;
-            const explodingScale = isExploding ? [1.5, 1.2, 0.8, 0.4, 0] : undefined;
-            const explodingOpacity = isExploding ? [1, 0.8, 0.5, 0.2, 0] : undefined;
+            // Escalating shake animation values (slow to heavy)
+            const shakingX = isShaking ? [0, -2, 3, -5, 8, -12, 16, -22, 28] : undefined;
+
+            // Shrink + fade out when exploding
+            const explodingScale = isExploding ? 0 : undefined;
+            const explodingOpacity = isExploding ? 0 : undefined;
 
             return (
               <motion.div
@@ -331,15 +363,18 @@ export default function ContactShowcase() {
                 `}
                 initial={false}
                 animate={{
-                  x: isExploding ? explodingX : x,
-                  scale: isExploding ? explodingScale : scale,
+                  x: isExploding ? 0 : isShaking ? shakingX : x,
+                  scale: isExploding ? explodingScale : isShaking ? scale : scale,
                   zIndex,
-                  opacity: isExploding ? explodingOpacity : opacity,
+                  opacity: isExploding ? explodingOpacity : isShaking ? 1 : opacity,
                 }}
                 transition={isExploding ? {
-                  duration: 0.5,
-                  ease: [0.34, 1.56, 0.64, 1],
-                  times: [0, 0.15, 0.4, 0.7, 1],
+                  duration: 0.3,
+                  ease: 'easeOut',
+                } : isShaking ? {
+                  duration: 1.5,
+                  ease: 'easeInOut',
+                  times: [0, 0.1, 0.2, 0.35, 0.5, 0.65, 0.78, 0.88, 1],
                 } : {
                   type: 'spring',
                   stiffness: 260,
@@ -361,6 +396,39 @@ export default function ContactShowcase() {
         <div id={styles.particles2} />
         <div id={styles.particles3} />
       </div>
+
+      {/* ── Burst particles when icon explodes ── */}
+      {explodingIndex !== null && (
+        <div className={styles.burstContainer}>
+          {burstParticles.map((p, i) => (
+            <motion.div
+              key={i}
+              className={styles.burstParticle}
+              style={{
+                width: p.size,
+                height: p.size,
+                background: p.color,
+                boxShadow: p.color === '#b2f548'
+                  ? `0 0 4px ${p.color}, 0 0 10px rgba(178, 245, 72, 0.3)`
+                  : `0 0 3px ${p.color}, 0 0 6px rgba(255, 255, 255, 0.2)`,
+              }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+              animate={{
+                x: p.x * 1.8,
+                y: p.y * 1.8,
+                opacity: [1, 0.8, 0.3, 0],
+                scale: [1, 0.8, 0.3, 0],
+              }}
+              transition={{
+                duration: 1.8,
+                delay: p.delay,
+                times: [0, 0.2, 0.6, 1],
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
+            />
+          ))}
+        </div>
+      )}
 
     </div>
   );

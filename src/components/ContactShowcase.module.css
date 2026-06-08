@@ -265,6 +265,23 @@
   }
 }
 
+/* ── Burst Particles (icon explosion) ── */
+.burstContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.burstParticle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 /* ── Inline Search Input & Answer ── */
 .searchInputWrapper {
   display: flex;
