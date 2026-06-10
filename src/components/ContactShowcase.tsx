@@ -27,17 +27,18 @@ export default function ContactShowcase() {
 
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // ── Burst particles config (3x bigger) ──
+  // ── Burst fragments config (high speed, gravity, rotation) ──
   const burstParticles = useMemo(() =>
-    Array.from({ length: 120 }, (_, i) => {
-      const angle = (i / 120) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const dist = 60 + Math.random() * 200;
+    Array.from({ length: 150 }, (_, i) => {
+      const angle = (i / 150) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+      const velocity = 150 + Math.random() * 300;
       return {
-        x: Math.cos(angle) * dist,
-        y: Math.sin(angle) * dist,
-        size: 4 + Math.random() * 8,
-        delay: Math.random() * 0.15,
-        color: Math.random() > 0.4 ? '#b2f548' : '#ffffff',
+        x: Math.cos(angle) * velocity,
+        y: Math.sin(angle) * velocity - 150, // initial upwards bias
+        size: 3 + Math.random() * 12,
+        delay: Math.random() * 0.08,
+        color: Math.random() > 0.4 ? '#b2f548' : Math.random() > 0.3 ? '#ffffff' : '#888888',
+        rotation: Math.random() * 720 - 360,
       };
     }), []
   );
@@ -226,8 +227,8 @@ export default function ContactShowcase() {
     }, 1500);
   };
 
-  // ── Drag handlers ──
-  const handleDragEnd = (_: any, info: any) => {
+  // ── Swipe handlers (replaces visual drag) ──
+  const handlePanEnd = (_: any, info: any) => {
     const threshold = 40;
     if (info.offset.x < -threshold && activeIconIndex < ICONS.length - 1) {
       setActiveIconIndex(activeIconIndex + 1);
@@ -297,10 +298,7 @@ export default function ContactShowcase() {
       <div className={styles.sliderWrapper}>
         <motion.div
           className={styles.sliderTrack}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.15}
-          onDragEnd={handleDragEnd}
+          onPanEnd={handlePanEnd}
         >
           {ICONS.map((icon, index) => {
             const offset = index - activeIconIndex;
@@ -422,18 +420,19 @@ export default function ContactShowcase() {
                   ? `0 0 4px ${p.color}, 0 0 10px rgba(178, 245, 72, 0.3)`
                   : `0 0 3px ${p.color}, 0 0 6px rgba(255, 255, 255, 0.2)`,
               }}
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
               animate={{
-                x: p.x * 3.0,
-                y: p.y * 3.0,
-                opacity: [1, 0.8, 0.3, 0],
-                scale: [1, 0.8, 0.3, 0],
+                x: [0, p.x * 0.5, p.x],
+                y: [0, p.y * 0.5, p.y + 400], // falls down heavily
+                opacity: [1, 0.9, 0],
+                scale: [1, Math.random() * 0.5 + 0.5, 0],
+                rotate: [0, p.rotation / 2, p.rotation],
               }}
               transition={{
-                duration: 2.0,
+                duration: 1.2 + Math.random() * 0.8,
                 delay: p.delay,
-                times: [0, 0.2, 0.6, 1],
-                ease: [0.25, 0.46, 0.45, 0.94],
+                times: [0, 0.4, 1],
+                ease: 'easeOut',
               }}
             />
           ))}
