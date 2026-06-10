@@ -27,18 +27,36 @@ export default function ContactShowcase() {
 
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // ── Burst fragments config (high speed, gravity, rotation) ──
-  const burstParticles = useMemo(() =>
-    Array.from({ length: 150 }, (_, i) => {
-      const angle = (i / 150) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const velocity = 150 + Math.random() * 300;
+  // ── Realistic Explosion Config ──
+  // 1. Sparks: Fast, bright, with trails
+  const sparks = useMemo(() =>
+    Array.from({ length: 60 }, (_, i) => {
+      const angle = (i / 60) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+      const velocity = 250 + Math.random() * 400;
       return {
+        id: `spark-${i}`,
         x: Math.cos(angle) * velocity,
-        y: Math.sin(angle) * velocity - 150, // initial upwards bias
-        size: 3 + Math.random() * 12,
-        delay: Math.random() * 0.08,
-        color: Math.random() > 0.4 ? '#b2f548' : Math.random() > 0.3 ? '#ffffff' : '#888888',
-        rotation: Math.random() * 720 - 360,
+        y: Math.sin(angle) * velocity - 100, // gravity bias
+        angle: angle * (180 / Math.PI),
+        length: 20 + Math.random() * 40,
+        thickness: 1 + Math.random() * 2,
+        delay: Math.random() * 0.05,
+        color: Math.random() > 0.5 ? '#b2f548' : '#ffffff',
+      };
+    }), []
+  );
+
+  // 2. Smoke: Slow, expanding, blurry
+  const smokes = useMemo(() =>
+    Array.from({ length: 25 }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 50 + Math.random() * 150;
+      return {
+        id: `smoke-${i}`,
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist - 50,
+        size: 30 + Math.random() * 60,
+        delay: Math.random() * 0.1,
       };
     }), []
   );
@@ -405,33 +423,72 @@ export default function ContactShowcase() {
         </div>
       )}
 
-      {/* ── Burst particles when icon explodes ── */}
+      {/* ── Realistic Explosion Effects ── */}
       {explodingIndex !== null && (
         <div className={styles.burstContainer}>
-          {burstParticles.map((p, i) => (
+          {/* Flash */}
+          <motion.div
+            className={styles.explosionFlash}
+            initial={{ opacity: 1, scale: 0.5 }}
+            animate={{ opacity: 0, scale: 4 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+          
+          {/* Shockwave */}
+          <motion.div
+            className={styles.shockwave}
+            initial={{ opacity: 1, scale: 0 }}
+            animate={{ opacity: 0, scale: 6 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          />
+
+          {/* Sparks */}
+          {sparks.map((p) => (
             <motion.div
-              key={i}
-              className={styles.burstParticle}
+              key={p.id}
+              className={styles.spark}
               style={{
-                width: p.size,
-                height: p.size,
+                width: p.length,
+                height: p.thickness,
                 background: p.color,
-                boxShadow: p.color === '#b2f548'
-                  ? `0 0 4px ${p.color}, 0 0 10px rgba(178, 245, 72, 0.3)`
-                  : `0 0 3px ${p.color}, 0 0 6px rgba(255, 255, 255, 0.2)`,
+                boxShadow: `0 0 8px ${p.color}, 0 0 15px ${p.color}`,
+                rotate: p.angle,
               }}
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
+              initial={{ x: 0, y: 0, opacity: 1, scaleX: 1 }}
               animate={{
-                x: [0, p.x * 0.5, p.x],
-                y: [0, p.y * 0.5, p.y + 400], // falls down heavily
-                opacity: [1, 0.9, 0],
-                scale: [1, Math.random() * 0.5 + 0.5, 0],
-                rotate: [0, p.rotation / 2, p.rotation],
+                x: [0, Math.cos(p.angle * (Math.PI / 180)) * 100, p.x],
+                y: [0, Math.sin(p.angle * (Math.PI / 180)) * 100, p.y + 400], // gravity
+                opacity: [1, 1, 0],
+                scaleX: [1, 1.5, 0],
               }}
               transition={{
-                duration: 1.2 + Math.random() * 0.8,
+                duration: 0.8 + Math.random() * 0.6,
                 delay: p.delay,
-                times: [0, 0.4, 1],
+                times: [0, 0.2, 1],
+                ease: 'easeOut',
+              }}
+            />
+          ))}
+
+          {/* Smoke */}
+          {smokes.map((s) => (
+            <motion.div
+              key={s.id}
+              className={styles.smoke}
+              style={{
+                width: s.size,
+                height: s.size,
+              }}
+              initial={{ x: 0, y: 0, opacity: 0, scale: 0.5 }}
+              animate={{
+                x: s.x,
+                y: s.y,
+                opacity: [0, 0.6, 0],
+                scale: [0.5, 1.5, 2.5],
+              }}
+              transition={{
+                duration: 2 + Math.random() * 1.5,
+                delay: s.delay,
                 ease: 'easeOut',
               }}
             />
