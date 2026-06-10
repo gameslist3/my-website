@@ -47,27 +47,27 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  background: rgba(10, 10, 15, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 30px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 36px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   overflow: hidden;
   pointer-events: auto;
-  transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: min(640px, 85vw);
   width: auto;
   min-width: 250px;
 }
 
 .askBoxOpen {
-  border-radius: 20px;
-  border-color: rgba(178, 245, 72, 0.5);
-  background: rgba(10, 10, 15, 0.85);
+  border-radius: 24px;
+  border-color: rgba(178, 245, 72, 0.3);
+  background: rgba(15, 15, 20, 0.85);
   width: 100%;
   max-width: min(720px, 90vw);
-  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(178, 245, 72, 0.2), inset 0 0 20px rgba(178, 245, 72, 0.05);
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(178, 245, 72, 0.15), inset 0 0 20px rgba(178, 245, 72, 0.05);
 }
 
 .askBtn {

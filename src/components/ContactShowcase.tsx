@@ -32,7 +32,7 @@ export default function ContactShowcase() {
   const dustParticles = useMemo(() =>
     Array.from({ length: 150 }, (_, i) => {
       const angle = Math.random() * Math.PI * 2;
-      const velocity = 30 + Math.random() * 120; // Slower, drifty spread
+      const velocity = 80 + Math.random() * 400; // Faster spread for a larger area
       return {
         id: `dust-${i}`,
         x: Math.cos(angle) * velocity,
@@ -207,18 +207,18 @@ export default function ContactShowcase() {
       v.play().catch(() => {});
     }
 
-    // Generate random shake keyframes — random directions, growing like a bubble
-    const numFrames = 14;
+    // Generate random shake keyframes — intense struggle, growing smoothly
+    const numFrames = 30; // higher framerate for intense shake
     const xArr = [0];
     const yArr = [0];
     const scaleArr = [1.5]; // starts at current center scale
     for (let i = 1; i < numFrames; i++) {
       const t = i / (numFrames - 1);
-      const intensity = 1 + t * t * 24;
+      const intensity = t * 15; // Max 15px violent shake
       const angle = Math.random() * Math.PI * 2; // random direction every frame
       xArr.push(Math.cos(angle) * intensity);
       yArr.push(Math.sin(angle) * intensity);
-      scaleArr.push(1.5 + t * 2.5); // grows 1.5x → 4x
+      scaleArr.push(1.5 + Math.pow(t, 2) * 3.5); // non-linear growth up to 5x scale
     }
     setShakeKF({ x: xArr, y: yArr, scale: scaleArr });
 
@@ -382,7 +382,7 @@ export default function ContactShowcase() {
                 }}
                 onClick={() => handleIconClick(index)}
               >
-                <img src={icon.src} alt={icon.id} className={styles.iconImage} />
+                <img src={icon.src} alt={icon.id} className={styles.iconImage} draggable={false} />
               </motion.div>
             );
           })}
