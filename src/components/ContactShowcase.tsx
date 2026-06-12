@@ -148,6 +148,8 @@ export default function ContactShowcase() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const askBoxRef = useRef<HTMLDivElement>(null);
 
@@ -166,6 +168,7 @@ export default function ContactShowcase() {
       if (askBoxRef.current && !askBoxRef.current.contains(e.target as Node)) {
         setSearchOpen(false);
         setSearchQuery('');
+        setAnswer(null);
       }
     };
     const t = setTimeout(() => document.addEventListener('mousedown', handleClick), 50);
@@ -182,11 +185,50 @@ export default function ContactShowcase() {
       if (e.key === 'Escape') {
         setSearchOpen(false);
         setSearchQuery('');
+        setAnswer(null);
       }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [searchOpen]);
+
+  // ── Handle Search — calls API and shows results ──
+  const handleSearch = useCallback(async (overrideQuery?: string) => {
+    const query = typeof overrideQuery === 'string' ? overrideQuery : searchQuery;
+    if (!query.trim()) return;
+    setIsSearching(true);
+    setAnswer(null);
+
+    try {
+      // 1. Try serverless API route
+      const response = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+
+      if (response.ok) {
+        const res = await response.json();
+        setAnswer({ text: res.answer, generic: res.generic });
+        setIsSearching(false);
+        return;
+      }
+    } catch (serverError) {
+      console.warn("Serverless route /api/ask unavailable, trying local fallback...", serverError);
+    }
+
+    // 2. Local offline keyword matching fallback
+    try {
+      const { askAgent } = await import('@/lib/agentLogic');
+      const res = askAgent(query);
+      setAnswer({ text: res.answer, generic: res.generic });
+    } catch (error) {
+      console.error("Fallback error:", error);
+      setAnswer({ text: "I couldn't load a live answer, but I would love to connect and chat directly!", generic: true });
+    } finally {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
 
   // ── Handle Mic / Voice Search ──
   const handleMicClick = () => {
@@ -220,7 +262,12 @@ export default function ContactShowcase() {
     
     recognition.onend = () => {
       setIsListening(false);
-      // Let user manually hit enter to submit, or we could auto submit
+      // Auto-submit the spoken query
+      setTimeout(() => {
+        if (inputRef.current && inputRef.current.value) {
+          handleSearch(inputRef.current.value);
+        }
+      }, 300);
     };
     
     recognition.start();
@@ -341,7 +388,7 @@ export default function ContactShowcase() {
             style={{ pointerEvents: searchOpen ? 'auto' : 'none' }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                 // trigger search logic if implemented, or just keep state
+                handleSearch();
               }
             }}
           />
@@ -368,6 +415,61 @@ export default function ContactShowcase() {
             )}
           </AnimatePresence>
         </motion.div>
+
+        {/* ── Search Results ── */}
+        <AnimatePresence>
+          {(answer || isSearching) && (
+            <motion.div
+              className={styles.searchResults}
+              initial={{ opacity: 0, y: -12, scaleY: 0.92 }}
+              animate={{ opacity: 1, y: 0, scaleY: 1 }}
+              exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {isSearching ? (
+                <motion.div
+                  className={styles.searchStatus}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: 'easeInOut' }}
+                >
+                  <span className={styles.loadingDot} />
+                  <span className={styles.loadingDot} style={{ animationDelay: '0.15s' }} />
+                  <span className={styles.loadingDot} style={{ animationDelay: '0.3s' }} />
+                  &nbsp; Analyzing
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
+                  <div className={styles.searchStatus}>Response</div>
+                  <motion.div
+                    className={styles.searchAnswer}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.15 }}
+                  >
+                    {answer?.text}
+                  </motion.div>
+                  {answer?.generic && (
+                    <motion.div
+                      className={styles.searchContactBtn}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.3 }}
+                    >
+                      Contact Me
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── Icon Slider — drag/swipe directly on icons or space between ── */}

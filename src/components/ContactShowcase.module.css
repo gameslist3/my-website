@@ -39,6 +39,8 @@
   left: 0;
   right: 0;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   z-index: 50;
 }
@@ -369,4 +371,91 @@
 
 .searchInput:focus::placeholder {
   color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Search Results ── */
+.searchResults {
+  width: min(640px, 85vw);
+  margin-top: 6px;
+  background: rgba(10, 10, 16, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(178, 245, 72, 0.12);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  padding: 14px 18px;
+  pointer-events: auto;
+  overflow: hidden;
+  transform-origin: top center;
+}
+
+.searchStatus {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(178, 245, 72, 0.6);
+  margin-bottom: 6px;
+  font-weight: 500;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.loadingDot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(178, 245, 72, 0.6);
+  animation: dotPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.searchAnswer {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 330;
+  letter-spacing: 0.01em;
+}
+
+.searchContactBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border-radius: 16px;
+  background: rgba(178, 245, 72, 0.08);
+  border: 1px solid rgba(178, 245, 72, 0.15);
+  color: #b2f548;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.searchContactBtn:hover {
+  background: rgba(178, 245, 72, 0.15);
+  border-color: rgba(178, 245, 72, 0.3);
+  box-shadow: 0 0 16px rgba(178, 245, 72, 0.08);
+}
+
+/* ── Responsive: smaller results on mobile ── */
+@media (max-width: 480px) {
+  .searchResults {
+    width: min(400px, 90vw);
+    padding: 12px 14px;
+    border-radius: 16px;
+    margin-top: 5px;
+  }
+  .searchAnswer {
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
 }
