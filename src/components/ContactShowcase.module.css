@@ -333,35 +333,62 @@
   color: #b2f548;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
   opacity: 0.8;
 }
 
 .micIcon {
-  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-content: center;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
-  padding: 4px;
-  border-radius: 50%;
+  position: relative;
+}
+
+.micIcon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .micIcon:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .micListening {
-  color: #ff4d4f;
-  animation: pulseMic 1.5s infinite ease-in-out;
+  color: #ff4d4f !important;
+  border-color: transparent !important;
 }
 
-@keyframes pulseMic {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
+.micListening::before,
+.micListening::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid #ff4d4f;
+  animation: micWave 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.micListening::after {
+  animation-delay: 0.75s;
+}
+
+@keyframes micWave {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
 
 .searchInput {
