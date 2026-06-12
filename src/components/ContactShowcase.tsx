@@ -283,8 +283,8 @@ export default function ContactShowcase() {
     }, 1500);
   };
 
-  // ── Swipe handlers (replaces visual drag) ──
-  const handlePanEnd = (_: any, info: any) => {
+  // ── Drag handlers (replaces visual drag but captures gesture) ──
+  const handleDragEnd = (_: any, info: any) => {
     const threshold = 40;
     if (info.offset.x < -threshold && activeIconIndex < ICONS.length - 1) {
       setActiveIconIndex(activeIconIndex + 1);
@@ -374,7 +374,10 @@ export default function ContactShowcase() {
       <div className={styles.sliderWrapper}>
         <motion.div
           className={styles.sliderTrack}
-          onPanEnd={handlePanEnd}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0}
+          onDragEnd={handleDragEnd}
         >
           {ICONS.map((icon, index) => {
             const offset = index - activeIconIndex;
