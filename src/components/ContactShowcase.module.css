@@ -35,7 +35,7 @@
 /* ── Creative Unified Ask Pill ── */
 .askBarContainer {
   position: absolute;
-  top: 40px;
+  top: 80px;
   left: 0;
   right: 0;
   display: flex;
@@ -46,8 +46,8 @@
 .askPill {
   display: flex;
   align-items: center;
-  height: 56px;
-  border-radius: 28px;
+  height: 64px;
+  border-radius: 32px;
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -66,8 +66,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
   transition: all 0.3s ease;
@@ -85,9 +85,9 @@
   background: transparent;
   border: none;
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   outline: none;
-  padding: 0 12px;
+  padding: 0 16px;
   font-weight: 400;
   letter-spacing: 0.02em;
   cursor: inherit;

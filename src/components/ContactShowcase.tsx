@@ -325,7 +325,7 @@ export default function ContactShowcase() {
         >
           {/* Left Search Icon */}
           <div className={`${styles.iconBase} ${styles.searchPillIcon}`}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
               <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
               <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
@@ -338,7 +338,7 @@ export default function ContactShowcase() {
             placeholder={isListening ? "Listening..." : "Ask anything..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            disabled={!searchOpen}
+            style={{ pointerEvents: searchOpen ? 'auto' : 'none' }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                  // trigger search logic if implemented, or just keep state
@@ -361,7 +361,7 @@ export default function ContactShowcase() {
                 }}
                 title="Voice Search"
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                 </svg>
               </motion.div>
