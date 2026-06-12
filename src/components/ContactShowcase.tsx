@@ -305,59 +305,65 @@ export default function ContactShowcase() {
         onEnded={handleVideoEnded}
       />
 
-      {/* Top Ask Bar — minimal: search icon + typing input only */}
+      {/* Top Ask Bar — minimalist expanding pill */}
       <div className={styles.askBarContainer}>
         <motion.div
           ref={askBoxRef}
-          className={`${styles.askBox} ${searchOpen ? styles.askBoxOpen : ''}`}
-          layout
+          className={`${styles.askPill} ${searchOpen ? styles.askPillOpen : ''}`}
+          animate={{
+            width: searchOpen ? 'min(640px, 85vw)' : '220px',
+            backgroundColor: searchOpen ? 'rgba(15, 15, 20, 0.85)' : 'rgba(255, 255, 255, 0.03)',
+            borderColor: searchOpen ? 'rgba(178, 245, 72, 0.4)' : 'rgba(255, 255, 255, 0.08)',
+          }}
+          transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
+          onClick={() => {
+            if (!searchOpen) {
+              setSearchOpen(true);
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }
+          }}
         >
-          <div className={styles.askBtn} onClick={() => setSearchOpen(prev => !prev)}>
-            <div className={styles.askIcon}>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
+          {/* Left Search Icon */}
+          <div className={`${styles.iconBase} ${styles.searchPillIcon}`}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+              <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </div>
 
+          {/* Input Area */}
+          <input
+            ref={inputRef}
+            className={styles.pillInput}
+            placeholder={isListening ? "Listening..." : "Ask anything..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={!searchOpen}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                 // trigger search logic if implemented, or just keep state
+              }
+            }}
+          />
+
+          {/* Right Mic Icon (only visible when open) */}
           <AnimatePresence>
             {searchOpen && (
               <motion.div
-                className={styles.askDropdown}
-                initial={{ height: 0, opacity: 0, y: -8 }}
-                animate={{ height: 'auto', opacity: 1, y: 0 }}
-                exit={{ height: 0, opacity: 0, y: -8 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+                className={`${styles.iconBase} ${styles.micPillIcon} ${isListening ? styles.micListening : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMicClick();
+                }}
+                title="Voice Search"
               >
-                <div className={styles.typingArea}>
-                  <div className={styles.searchIcon}>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-                      <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z" fill="currentColor"/>
-                    </svg>
-                  </div>
-                  <input
-                    ref={inputRef}
-                    className={styles.searchInput}
-                    placeholder={isListening ? "Listening..." : "Ask anything..."}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                         // trigger search logic if implemented, or just keep state
-                      }
-                    }}
-                  />
-                  <div 
-                    className={`${styles.micIcon} ${isListening ? styles.micListening : ''}`} 
-                    onClick={handleMicClick}
-                    title="Voice Search"
-                  >
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                    </svg>
-                  </div>
-                </div>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
               </motion.div>
             )}
           </AnimatePresence>
