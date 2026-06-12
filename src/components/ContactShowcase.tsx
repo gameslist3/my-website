@@ -147,6 +147,7 @@ export default function ContactShowcase() {
   // ── Search/Ask State ──
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const askBoxRef = useRef<HTMLDivElement>(null);
 
@@ -186,6 +187,44 @@ export default function ContactShowcase() {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [searchOpen]);
+
+  // ── Handle Mic / Voice Search ──
+  const handleMicClick = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+      setSearchQuery(''); // clear current to show incoming voice
+    };
+    
+    recognition.onresult = (event: any) => {
+      let currentTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        currentTranscript += event.results[i][0].transcript;
+      }
+      setSearchQuery(currentTranscript);
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+      // Let user manually hit enter to submit, or we could auto submit
+    };
+    
+    recognition.start();
+  };
 
   // ── Handle clicking an icon — instant shake+bubble → explode ──
   const handleIconClick = (index: number) => {
@@ -300,10 +339,24 @@ export default function ContactShowcase() {
                   <input
                     ref={inputRef}
                     className={styles.searchInput}
-                    placeholder="Ask anything..."
+                    placeholder={isListening ? "Listening..." : "Ask anything..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                         // trigger search logic if implemented, or just keep state
+                      }
+                    }}
                   />
+                  <div 
+                    className={`${styles.micIcon} ${isListening ? styles.micListening : ''}`} 
+                    onClick={handleMicClick}
+                    title="Voice Search"
+                  >
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -26,8 +26,9 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
   const [resumeOrigin, setResumeOrigin] = useState({ left: 0, top: 0, width: 220, height: 220 });
   const [searchTarget, setSearchTarget] = useState({ left: 0, top: 0 });
   const [searchQuery, setSearchQuery] = useState('');
-  const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [answer, setAnswer] = useState<{ text: string; generic: boolean } | null>(null);
 
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
@@ -121,8 +122,9 @@ export default function LeftNav({ activeSection, setActiveSection }: LeftNavProp
     setIsSearching(false);
   }, []);
 
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim()) return;
+  const handleSearch = useCallback(async (overrideQuery?: string | React.MouseEvent | React.KeyboardEvent) => {
+    const query = typeof overrideQuery === 'string' ? overrideQuery : searchQuery;
+    if (!query.trim()) return;
     setIsSearching(true);
     setAnswer(null);
     
@@ -213,7 +215,7 @@ ${profileData.longTermGoals}
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `${systemPrompt}\n\nUser Question: ${searchQuery}` }] }]
+            contents: [{ parts: [{ text: `${systemPrompt}\n\nUser Question: ${query}` }] }]
           })
         });
 
@@ -234,7 +236,7 @@ ${profileData.longTermGoals}
     // 3. Local offline keyword matching fallback
     try {
       const { askAgent } = await import('@/lib/agentLogic');
-      const res = askAgent(searchQuery);
+      const res = askAgent(query);
       setAnswer({ text: res.answer, generic: res.generic });
     } catch (error) {
       console.error("Fallback error, falling back to basic prompt:", error);
@@ -243,6 +245,50 @@ ${profileData.longTermGoals}
       setIsSearching(false);
     }
   }, [searchQuery]);
+
+  // ── Handle Mic / Voice Search ──
+  const handleMicClick = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+      setSearchQuery('');
+    };
+    
+    recognition.onresult = (event: any) => {
+      let currentTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        currentTranscript += event.results[i][0].transcript;
+      }
+      setSearchQuery(currentTranscript);
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+    
+    let finalQuery = '';
+    recognition.onend = () => {
+      setIsListening(false);
+      // Wait for React state to process, then use the latest query or final query from the input
+      setTimeout(() => {
+        if (inputRef.current && inputRef.current.value) {
+          handleSearch(inputRef.current.value);
+        }
+      }, 300);
+    };
+    
+    recognition.start();
+  };
 
   // ── Card fan-out transforms ──
   const getCardAnimate = (cardNum: number) => {
@@ -476,12 +522,21 @@ ${profileData.longTermGoals}
                   ref={inputRef}
                   type="text"
                   className={styles.searchInput}
-                  placeholder="Ask anything..."
+                  placeholder={isListening ? "Listening..." : "Ask anything..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                 />
-                <button className={styles.searchButton} onClick={handleSearch}>
+                <div 
+                  className={`${styles.micIcon} ${isListening ? styles.micListening : ''}`} 
+                  onClick={handleMicClick}
+                  title="Voice Search"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                  </svg>
+                </div>
+                <button className={styles.searchButton} onClick={() => handleSearch()}>
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
                     <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                     <path d="M16.5 16.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
